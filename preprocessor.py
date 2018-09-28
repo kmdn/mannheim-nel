@@ -2,14 +2,13 @@ from utils import reverse_dict, normalise_form, get_normalised_forms, equalize_l
 import spacy
 import numpy as np
 
-import sys
 from tokenizer import RegexpTokenizer
 
 
 class PreProcessor(object):
 
     def __init__(self,
-                 yamada_model=None,
+                 model_params=None,
                  necounts=None,
                  ent_priors=None,
                  ent_conditionals=None,
@@ -17,12 +16,12 @@ class PreProcessor(object):
                  max_cands=None,
                  filter_out=None):
 
-        self.ent2id = yamada_model['ent_dict']
+        self.ent2id = model_params['ent_dict']
         self.id2ent = reverse_dict(self.ent2id)
         self.ent_priors = ent_priors
         self.ent_conditionals = ent_conditionals
         self.nlp = spacy.load('en')
-        self.word_dict = yamada_model['word_dict']
+        self.word_dict = model_params['word_dict']
         self.tokenizer = RegexpTokenizer()
         self.necounts = necounts
         self.filter_out = filter_out

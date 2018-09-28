@@ -22,12 +22,8 @@ def setup():
     app.logger.info('necounts loaded.')
 
     app.logger.info('loading yamada model.....')
-    yamada_model = pickle_load('data/yamada_model.pickle')
+    model_params = pickle_load('data/full_model/wiki.pickle')
     app.logger.info('yamada model loaded.')
-
-    app.logger.info('loading nel model.....')
-    params = pickle_load('data/models/nel-ws-wiki.pickle')
-    app.logger.info('nel model loaded.')
 
     app.logger.info('loading stat features.....')
     ent_conditionals = pickle_load('data/necounts/prior_prob.pickle')
@@ -35,12 +31,12 @@ def setup():
     app.logger.info('stat features loaded.')
 
     app.logger.info('loading ent dict.....')
-    ent_dict = yamada_model['ent_dict']
+    ent_dict = model_params['ent_dict']
     id2ent = reverse_dict(ent_dict)
     app.logger.info('ent dict loaded.')
 
     app.logger.info('creating preprocessor.....')
-    processor = PreProcessor(yamada_model=yamada_model,
+    processor = PreProcessor(model_params=model_params,
                              necounts=necounts,
                              ent_priors=ent_priors,
                              ent_conditionals=ent_conditionals,
@@ -50,7 +46,7 @@ def setup():
     app.logger.info('preprocessor created.')
 
     app.logger.info('creating model.....')
-    nel = NEL(params=params)
+    nel = NEL(params=model_params)
     app.logger.info('model created.')
 
     return processor, nel, id2ent

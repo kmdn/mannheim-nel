@@ -5,14 +5,14 @@ from utils import normalize, relu
 class NEL(object):
 
     def __init__(self, params=None):
-        self.word_embs = params['embeddings_word.weight']
-        self.ent_embs = params['embeddings_ent.weight']
-        self.orig_W = params['orig_linear.weight'].T  # Transpose here
-        self.orig_b = params['orig_linear.bias']
-        self.hidden_W = params['hidden.weight'].T  # Transpose here
-        self.hidden_b = params['hidden.bias']
-        self.output_W = params['output.weight'].T  # Transpose here
-        self.output_b = params['output.bias']
+        self.word_embs = params['word_embs']
+        self.ent_embs = params['ent_embs']
+        self.orig_W = params['orig_linear'].T  # Transpose herein
+        self.orig_b = params['orig_linear_bias']
+        self.hidden_W = params['hidden'].T  # Transpose here
+        self.hidden_b = params['hidden_bias']
+        self.output_W = params['output'].T  # Transpose here
+        self.output_b = params['output_bias']
 
     def __call__(self, inputs):
         # Unpack
