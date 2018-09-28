@@ -6,6 +6,8 @@ from model import NEL
 
 import numpy as np
 import logging
+import sys
+from os.path import join
 
 logging.basicConfig(level=logging.DEBUG)
 np.warnings.filterwarnings('ignore')
@@ -16,24 +18,24 @@ MAX_CANDS = 100
 MAX_CONTEXT = 200
 
 
-def setup():
-    app.logger.info('loading necounts.....', )
-    necounts = pickle_load('data/necounts/normal_necounts.pickle')
-    app.logger.info('necounts loaded.')
-
-    app.logger.info('loading yamada model.....')
-    model_params = pickle_load('data/full_model/wiki.pickle')
+def setup(data_path):
+    app.logger.info('loading model params.....')
+    model_params = pickle_load(join(data_path, 'models/wiki-model.pickle'))
     app.logger.info('yamada model loaded.')
 
-    app.logger.info('loading stat features.....')
-    ent_conditionals = pickle_load('data/necounts/prior_prob.pickle')
-    ent_priors, _ = pickle_load('data/necounts/stats.pickle')
-    app.logger.info('stat features loaded.')
-
-    app.logger.info('loading ent dict.....')
+    necounts = model_params['necounts']
+    ent_conditionals = model_params['conditionals']
+    ent_priors = model_params['priors']
     ent_dict = model_params['ent_dict']
     id2ent = reverse_dict(ent_dict)
-    app.logger.info('ent dict loaded.')
+
+    app.logger.info('loading entity embeddings.....')
+    ent_embs = pickle_load(join(data_path, 'embs/ent_embs.pickle'), encoding='latin-1')
+    app.logger.info('entity embeddings loaded.')
+
+    app.logger.info('loading word embeddings.....')
+    word_embs = pickle_load(join(data_path, 'embs/word_embs.pickle'), encoding='latin-1')
+    app.logger.info('word embeddings loaded.')
 
     app.logger.info('creating preprocessor.....')
     processor = PreProcessor(model_params=model_params,
@@ -46,15 +48,12 @@ def setup():
     app.logger.info('preprocessor created.')
 
     app.logger.info('creating model.....')
-    nel = NEL(params=model_params)
+    nel = NEL(ent_embs=ent_embs,
+              word_embs=word_embs,
+              params=model_params)
     app.logger.info('model created.')
 
     return processor, nel, id2ent
-
-
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
 
 
 @app.route('/results', methods=['GET', 'POST'])
@@ -80,8 +79,10 @@ def get_entities():
 
 
 if __name__ == '__main__':
-    processor, nel, id2ent = setup()
+    Data_path = sys.argv[1]
+    processor, nel, id2ent = setup(Data_path)
     app.logger.info('setup complete.')
 
     app.logger.info('app online.')
+
     app.run()

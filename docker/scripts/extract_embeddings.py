@@ -16,8 +16,8 @@ def extract(joblib_file):
     new_word_emb[1:] = word_embedding
     new_ent_emb[1:] = entity_embedding
 
-    new_ent_emb.dump(join('/data', 'ent_embs.pickle'))
-    new_word_emb.dump(join('/data', 'word_embs.pickle'))
+    new_ent_emb.dump(join('/data/embs', 'ent_embs.pickle'))
+    new_word_emb.dump(join('/data/embs', 'word_embs.pickle'))
 
 
 if __name__ == '__main__':

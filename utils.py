@@ -10,11 +10,11 @@ RE_WIKI_ENT = re.compile(r'.*wiki\/(.*)')
 RE_WS = re.compile('\s+')
 
 
-def pickle_load(path):
+def pickle_load(path, encoding='ASCIII'):
     assert os.path.exists(path)
 
     with open(path, 'rb') as f:
-        data = pickle.load(f)
+        data = pickle.load(f, encoding=encoding)
 
     return data
 

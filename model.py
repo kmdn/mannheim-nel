@@ -4,9 +4,9 @@ from utils import normalize, relu
 
 class NEL(object):
 
-    def __init__(self, params=None):
-        self.word_embs = params['word_embs']
-        self.ent_embs = params['ent_embs']
+    def __init__(self, word_embs=None, ent_embs=None, params=None):
+        self.word_embs = word_embs
+        self.ent_embs = ent_embs
         self.orig_W = params['orig_linear'].T  # Transpose herein
         self.orig_b = params['orig_linear_bias']
         self.hidden_W = params['hidden'].T  # Transpose here
