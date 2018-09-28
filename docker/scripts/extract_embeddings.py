@@ -22,3 +22,4 @@ def extract(joblib_file):
 
 if __name__ == '__main__':
     joblib_file = sys.argv[1]
+    extract(joblib_file)
