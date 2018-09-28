@@ -16,10 +16,9 @@ def extract(joblib_file):
     new_word_emb[1:] = word_embedding
     new_ent_emb[1:] = entity_embedding
 
-    new_ent_emb.dump(join('data', 'ent_embs.pickle'))
-    new_word_emb.dump(join('data', 'word_embs.pickle'))
+    new_ent_emb.dump(join('/data', 'ent_embs.pickle'))
+    new_word_emb.dump(join('/data', 'word_embs.pickle'))
 
 
 if __name__ == '__main__':
     joblib_file = sys.argv[1]
-    out_dir
