@@ -3,6 +3,7 @@ import numpy as np
 import pickle
 import sys
 from os.path import join
+sys.path.append('/ntee')
 
 
 def extract(joblib_file):
