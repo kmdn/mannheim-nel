@@ -56,15 +56,25 @@ def setup(data_path):
     return processor, nel, id2ent
 
 
-@app.route('/results', methods=['GET', 'POST'])
-def get_entities():
-    text = str(request.get_data().decode('utf-8'))
+@app.route('/full', methods=['GET', 'POST'])
+def mention_and_linking():
+    content = request.get_json(force=True)
+    text = content.get('text', '')
+    ret = processor.process(text)
 
-    input, mentions, mention_spans = processor.process(text)
-    context, candidates, priors, conditionals, exact_match, contains = input
-    scores = nel(input)
+    context = ret['context']
+    cands = ret['cands']
+    priors = ret['priors']
+    conditionals = ret['conditionals']
+    exact_match = ret['exact_match']
+    contains = ret['contains']
+    mentions = ret['mentions']
+    mention_spans = ret['mention_spans']
+
+    model_input = context, cands, priors, conditionals, exact_match, contains
+    scores = nel(model_input)
     pred_mask = np.argmax(scores, axis=1)
-    preds = candidates[np.arange(len(candidates)), pred_mask]
+    preds = cands[np.arange(len(cands)), pred_mask]
     entities = [id2ent.get(pred, '') for pred in preds]
 
     for i, ent in enumerate(entities):
@@ -76,6 +86,37 @@ def get_entities():
     assert len(mentions) == len(entities) == len(mention_spans)
 
     return jsonify({'mentions': mentions, 'entities': entities, 'spans': mention_spans}), 201
+
+
+@app.route('/link', methods=['GET', 'POST'])
+def linking():
+    content = request.get_json(force=True)
+    text = content.get('text', '')
+    mentions = content.get('mentions', [])
+    ret = processor.process(text, user_mentions=mentions)
+
+    context = ret['context']
+    cands = ret['cands']
+    priors = ret['priors']
+    conditionals = ret['conditionals']
+    exact_match = ret['exact_match']
+    contains = ret['contains']
+    mentions = ret['mentions']
+
+    model_input = context, cands, priors, conditionals, exact_match, contains
+    scores = nel(model_input)
+    pred_mask = np.argmax(scores, axis=1)
+    preds = cands[np.arange(len(cands)), pred_mask]
+    entities = [id2ent.get(pred, '') for pred in preds]
+
+    for i, ent in enumerate(entities):
+        if len(ent) == 0:
+            entities.pop(i)
+            mentions.pop(i)
+
+    assert len(mentions) == len(entities)
+
+    return jsonify({'mentions': mentions, 'entities': entities}), 201
 
 
 if __name__ == '__main__':

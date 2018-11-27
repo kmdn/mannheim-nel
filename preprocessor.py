@@ -89,9 +89,12 @@ class PreProcessor(object):
 
         return token_ids
 
-    def process(self, text):
+    def process(self, text, user_mentions=None):
         context_tokens = self._get_context_tokens(text)
-        all_mentions, all_mention_spans = self._get_mentions(text)
+        if not user_mentions:
+            all_mentions, all_mention_spans = self._get_mentions(text)
+        else:
+            all_mentions = user_mentions
         all_candidates = self._get_candidates(all_mentions)
 
         all_exact_match = []
@@ -108,11 +111,15 @@ class PreProcessor(object):
             all_priors.append(priors)
             all_conditionals.append(conditionals)
 
-        return ((np.array(context_tokens),
-                 np.array(all_candidates),
-                 np.array(all_priors),
-                 np.array(all_conditionals),
-                 np.array(all_exact_match),
-                 np.array(all_contains)),
-                all_mentions,
-                all_mention_spans)
+        ret = {'context': np.array(context_tokens, dtype=np.int64),
+               'cands': np.array(all_candidates, dtype=np.int64),
+               'priors': np.array(all_priors),
+               'conditionals': np.array(all_conditionals),
+               'exact_match': np.array(all_exact_match),
+               'contains': np.array(all_contains),
+               'mentions': all_mentions}
+
+        if not user_mentions:
+            ret['mention_spans'] = all_mention_spans
+
+        return ret
