@@ -9,7 +9,4 @@ class RegexpTokenizer(object):
         self.lower = lower
 
     def tokenize(self, text):
-        if self.lower:
-            return [text[o.start():o.end()].lower() for o in self._rule.finditer(text)]
-        else:
-            return [text[o.start():o.end()] for o in self._rule.finditer(text)]
+        return [text[o.start():o.end()].lower() for o in self._rule.finditer(text)]

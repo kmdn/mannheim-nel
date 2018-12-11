@@ -3,6 +3,7 @@ import pickle
 import sys
 import re
 import string
+import json
 import numpy as np
 
 RE_WS_PRE_PUCT = re.compile(u'\s+([^a-zA-Z\d])')
@@ -15,6 +16,15 @@ def pickle_load(path, encoding='ASCIII'):
 
     with open(path, 'rb') as f:
         data = pickle.load(f, encoding=encoding)
+
+    return data
+
+
+def json_load(path):
+    assert os.path.exists(path)
+
+    with open(path, 'r') as f:
+        data = json.load(f)
 
     return data
 
@@ -33,6 +43,10 @@ def iter_derived_forms(sf):
 
     if sf.startswith('The') or sf.startswith('the'):
         yield sf[4:]
+
+    if '-' in sf:
+        for part in sf.split('-'):
+            yield part
 
     comma_parts = sf.split(',')[:-1]
     for i in range(len(comma_parts)):
@@ -66,22 +80,17 @@ def reverse_dict(d):
 
 
 def relu(x):
-    x_c = x.copy()
-    x_c[x_c < 0] = 0
-    return x_c
+    x[x < 0] = 0
+    return x
 
 
-def equalize_len(data, max_size):
+def equalize_len(data, max_size, pad=''):
     d = data.copy()
     l = len(d)
     if l >= max_size:
         return d[:max_size]
     else:
         for _ in range(max_size - l):
-            d.append(0)
+            d.append(pad)
 
         return d
-
-
-if __name__ == '__main__':
-    pass

@@ -1,45 +1,28 @@
-from utils import reverse_dict, normalise_form, get_normalised_forms, equalize_len
-import spacy
+from utils import reverse_dict, normalise_form
 import numpy as np
-
-from tokenizer import RegexpTokenizer
 
 
 class PreProcessor(object):
 
-    def __init__(self,
-                 model_params=None,
-                 necounts=None,
-                 ent_priors=None,
-                 ent_conditionals=None,
-                 max_context=None,
-                 max_cands=None,
-                 filter_out=None):
+    def __init__(self, **kwargs):
 
-        self.ent2id = model_params['ent_dict']
+        self.ent2id = kwargs['ent_dict']
         self.id2ent = reverse_dict(self.ent2id)
-        self.ent_priors = ent_priors
-        self.ent_conditionals = ent_conditionals
-        self.nlp = spacy.load('en')
-        self.word_dict = model_params['word_dict']
-        self.tokenizer = RegexpTokenizer()
-        self.necounts = necounts
-        self.filter_out = filter_out
-        self.max_context = max_context
-        self.max_cands = max_cands
+        self.str_prior = kwargs['str_prior']
+        self.str_cond = kwargs['str_cond']
 
-    def _get_string_feats(self, mention_str, candidates):
+    @staticmethod
+    def _get_string_feats(mention_str, candidate_strs):
         exact_match = []
         contains = []
 
-        for candidate in candidates:
-            ent_str = self.id2ent.get(candidate, '')
-            if mention_str == ent_str or mention_str in ent_str:
+        for candidate_str in candidate_strs:
+            if mention_str == candidate_str or mention_str in candidate_str:
                 exact_match.append(1)
             else:
                 exact_match.append(0)
 
-            if ent_str.startswith(mention_str) or ent_str.endswith(mention_str):
+            if candidate_str.startswith(mention_str) or candidate_str.endswith(mention_str):
                 contains.append(1)
             else:
                 contains.append(0)
@@ -51,10 +34,10 @@ class PreProcessor(object):
         conditionals = []
 
         for candidate in candidates:
-            priors.append(self.ent_priors.get(candidate, 0))
+            priors.append(self.str_prior.get(candidate, 0))
             nf = normalise_form(mention_str)
-            if nf in self.ent_conditionals:
-                conditionals.append(self.ent_conditionals[nf].get(candidate, 0))
+            if nf in self.str_cond:
+                conditionals.append(self.str_cond[nf].get(candidate, 0))
             else:
                 conditionals.append(0)
 
@@ -63,63 +46,35 @@ class PreProcessor(object):
 
         return priors, conditionals
 
-    def _get_mentions(self, text):
-        doc = self.nlp(text)
-        strings = [ent.text for ent in doc.ents if not ent.label_ in self.filter_out]
-        spans = [(ent.start_char, ent.end_char) for ent in doc.ents if not ent.label_ in self.filter_out]
-
-        return strings, spans
-
-    def _get_candidates(self, mentions):
-        res = []
-        for mention in mentions:
-            nfs = get_normalised_forms(mention)
-            candidate_ids = []
-            for nf in nfs:
-                if nf in self.necounts:
-                    candidate_ids.extend(self.necounts[nf])
-
-            res.append(equalize_len(candidate_ids, self.max_cands))
-
-        return res
-
-    def _get_context_tokens(self, text):
-        tokens = self.tokenizer.tokenize(text)
-        token_ids = [self.word_dict.get(token, 0) for token in tokens][:self.max_context]
-
-        return token_ids
-
-    def process(self, text, user_mentions=None):
-        context_tokens = self._get_context_tokens(text)
-        if not user_mentions:
-            all_mentions, all_mention_spans = self._get_mentions(text)
-        else:
-            all_mentions = user_mentions
-        all_candidates = self._get_candidates(all_mentions)
+    def process(self, doc):
+        context_tokens = doc.get_context_tokens()
+        doc.gen_cands()
 
         all_exact_match = []
         all_contains = []
         all_priors = []
         all_conditionals = []
+        all_candidate_strs = []
+        all_candidate_ids = []
 
-        for men_idx, (mention, candidates) in enumerate(zip(all_mentions, all_candidates)):
-            exact_match, contains = self._get_string_feats(mention, candidates)
+        for men_idx, mention in enumerate(doc.mentions):
+            all_candidate_strs.append(mention.cands)
+            all_candidate_ids.append([self.ent2id.get(cand, 0) for cand in mention.cands])
+
+            exact_match, contains = self._get_string_feats(mention.text, mention.cands)
             all_exact_match.append(exact_match)
             all_contains.append(contains)
 
-            priors, conditionals = self._get_stat_feats(mention, candidates)
+            priors, conditionals = self._get_stat_feats(mention.text, mention.cands)
             all_priors.append(priors)
             all_conditionals.append(conditionals)
 
         ret = {'context': np.array(context_tokens, dtype=np.int64),
-               'cands': np.array(all_candidates, dtype=np.int64),
+               'candidate_ids': np.array(all_candidate_ids, dtype=np.int64),
+               'candidate_strs': np.array(all_candidate_strs),
                'priors': np.array(all_priors),
                'conditionals': np.array(all_conditionals),
                'exact_match': np.array(all_exact_match),
-               'contains': np.array(all_contains),
-               'mentions': all_mentions}
-
-        if not user_mentions:
-            ret['mention_spans'] = all_mention_spans
+               'contains': np.array(all_contains)}
 
         return ret
