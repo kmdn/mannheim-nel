@@ -1,0 +1,49 @@
+# General
+seed:-1
+exp_name:default
+debug:False
+
+# Data
+data_type:conll
+data_path:/work/rogupta/wikinet_data
+yamada_model:yamada_model.pickle
+num_shards:0
+train_size:0
+mmaps:False
+data_types:conll
+
+# Padding
+max_ent_size:35
+max_context_size:100
+num_docs:100
+
+# Model Params
+hidden_size:2000
+dp:0.2
+
+# Candidate Generation
+cand_type:necounts
+cand_gen_rand:False
+num_candidates:128
+prop_gen_candidates:0.75
+
+# Training Settings
+patience:10
+num_epochs:10
+batch_size:16
+num_workers:8
+lr:5e-02
+wd:1e-04
+embs_optim:rmsprop
+other_optim:rmsprop
+sparse:False
+save_every:5
+
+# Loss
+margin:0.5
+loss_func:cross_entropy
+
+# Cuda
+use_cuda:True
+device:0
+profile:False

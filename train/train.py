@@ -27,12 +27,13 @@ def parse_args():
 
     # Data
     data = parser.add_argument_group('Data Settings.')
-    data.add_argument('--data_path', type=str, help='location of data dir')
+    data.add_argument('--data_path', required=True, type=str, help='location of data dir')
     data.add_argument('--yamada_model', type=str, help='name of yamada model')
     data.add_argument('--data_type', type=str, choices=['conll', 'wiki', 'proto'], help='whether to train with conll or wiki')
     data.add_argument('--num_shards', type=int, help='number of shards of training file')
     data.add_argument('--train_size', type=int, help='number of training abstracts')
     data.add_argument('--mmap', type=str2bool, help='use dicts or mmaps')
+    data.add_argument('--data_types', type=str, help='name of datasets separated by comma')
 
     # Max Padding
     padding = parser.add_argument_group('Max Padding for batch.')
@@ -43,7 +44,6 @@ def parse_args():
 
     # Model Type
     model_selection = parser.add_argument_group('Type of model to train.')
-    model_selection.add_argument('--model_name', type=str, help='name of model to train')
     model_selection.add_argument('--pre_train', type=str, help='if specified, model will load state dict, must be ckpt')
 
     # Model params
@@ -138,7 +138,7 @@ def setup(args, logger):
     logger.info("Using {} for training.....".format(args.data_type))
     data = defaultdict(dict)
 
-    for data_type in DATA_TYPES:
+    for data_type in args.data_types.split(','):
         if data_type == 'wiki':
             res = load_data(args.data_type, args.train_size, args.data_path, coref=args.coref)
             id2context, examples = res['dev']
