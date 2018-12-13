@@ -69,16 +69,6 @@ class Dataset(object):
             self.processed_id2context[doc_id] = self._init_context(doc_id)
         logger.info("Generated.")
 
-        if 'corpus_vec' in self.args.model_name:
-            self.corpus_flag = True
-            if self.args.num_docs > len(self.id2context):
-                self.rand_docs = False
-                self.corpus_context = np.vstack([context_arr for context_arr in self.processed_id2context.values()])
-            else:
-                self.rand_docs = True
-        else:
-            self.corpus_flag = False
-
     def add_dismb_cands(self, cands, mention):
         mention_title = mention.title().replace(' ', '_')
         cands.append(mention_title)
@@ -140,7 +130,6 @@ class Dataset(object):
         contains = np.zeros(self.num_candidates).astype(np.float32)
         priors = np.zeros(self.num_candidates).astype(np.float32)
         conditionals = np.zeros(self.num_candidates).astype(np.float32)
-        # print(f'MENTION STR - {mention_str}, CAND STRS - {cand_strs}')
 
         # Populate
         for cand_idx, cand_str in enumerate(cand_strs):
@@ -156,27 +145,10 @@ class Dataset(object):
             else:
                 conditionals[cand_idx] = 0
 
-        # if not np.any(priors):
-        #     print('PRIOR IS ALL ZERO', mention_str, cand_strs[:10])
-        # if not np.any(conditionals):
-        #     print('CONDITIONALS IS ALL ZERO', mention_str, cand_strs[:10])
-
         return {'exact_match': exact,
                 'contains': contains,
                 'priors': priors,
                 'conditionals': conditionals}
-
-    def _get_corpus_context(self, context_id):
-        if self.rand_docs:
-            other_docs = [self.processed_id2context[index]
-                          for index in np.random.randint(0, high=len(self.processed_id2context),
-                                                         size=self.args.num_docs - 1)]
-            full_corpus = list(self.processed_id2context[context_id][None, :]) + other_docs
-            corpus_context = np.vstack(full_corpus)
-        else:
-            corpus_context = self.corpus_context
-
-        return corpus_context
 
     def _gen_pershina_cands(self, doc_id, ent_str, mention_str):
         try:
@@ -246,11 +218,7 @@ class Dataset(object):
                   'ent_strs': ent_str,
                   'label': label,
                   **features_dict}
-
-        if self.corpus_flag:
-            corpus_context = self._get_corpus_context(doc_id)
-            output['corpus_context'] = corpus_context
-
+        
         return output
 
     def __len__(self):
