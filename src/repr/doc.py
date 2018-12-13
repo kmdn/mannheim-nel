@@ -79,6 +79,6 @@ class Doc:
 
     def get_context_tokens(self):
         tokens = self.tokenizer.tokenize(self.text)
-        token_ids = [self.word_dict.get(token, 0) for token in tokens][:MAX_CONTEXT]
+        token_ids = [self.word_dict.get(token.text, 0) for token in tokens][:MAX_CONTEXT]
 
         return token_ids
