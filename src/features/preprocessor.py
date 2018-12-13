@@ -1,4 +1,4 @@
-from utils import reverse_dict, normalise_form
+from src.utils.utils import reverse_dict, normalise_form
 import numpy as np
 
 

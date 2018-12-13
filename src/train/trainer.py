@@ -7,8 +7,8 @@ import gc
 
 import torch
 from torch.autograd import Variable
-from utils.utils import save_checkpoint
-from utils.multi_optim import MuliOptim
+from src.utils.utils import save_checkpoint
+from src.utils.multi_optim import MuliOptim
 
 logger = logging.getLogger()
 

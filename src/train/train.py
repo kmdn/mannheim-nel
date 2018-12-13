@@ -2,13 +2,12 @@
 from datetime import datetime
 import configargparse
 
-from utils.utils import *
-from train.dataset import Dataset
-from train.validator import Validator
-from models.model import Model
-from utils.logger import get_logger
-from train.trainer import Trainer
-from utils.file import FileObjectStore
+from src.train.dataset import Dataset
+from src.train.validator import Validator
+from src.models.model import Model
+from src.utils.logger import get_logger
+from src.train.trainer import Trainer
+from src.utils.file import FileObjectStore
 
 np.warnings.filterwarnings('ignore')
 

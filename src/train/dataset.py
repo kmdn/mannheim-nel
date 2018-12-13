@@ -1,9 +1,8 @@
 # This module implements dataloader for the yamada model
 
 import torch.utils.data
-from utils.utils import *
 from more_itertools import unique_everseen
-from utils.tokenizer import RegexpTokenizer
+from src.utils.tokenizer import RegexpTokenizer
 import random
 
 from logging import getLogger

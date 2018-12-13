@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch
 
 
-class YamadaBase(nn.Module):
+class Base(nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
 

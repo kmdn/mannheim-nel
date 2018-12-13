@@ -1,4 +1,4 @@
-from utils import get_normalised_forms, equalize_len
+from src.utils.utils import get_normalised_forms, equalize_len
 from more_itertools import unique_everseen
 MAX_CANDS = 100
 

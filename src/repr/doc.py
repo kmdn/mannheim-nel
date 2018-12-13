@@ -1,6 +1,6 @@
-from repr.mention import Mention
+from src.repr.mention import Mention
 import spacy
-from utils.tokenizer import RegexpTokenizer
+from src.utils.tokenizer import RegexpTokenizer
 
 nlp = spacy.load('en')
 ENT_FILTER = {'CARDINAL', 'DATE', 'TIME', 'PERCENT', 'MONEY', 'QUANTITY', 'ORDINAL'}

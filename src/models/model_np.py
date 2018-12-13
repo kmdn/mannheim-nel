@@ -1,5 +1,5 @@
 import numpy as np
-from utils import normalize, relu
+from src.utils import normalize, relu
 from flask import Flask
 
 import torch

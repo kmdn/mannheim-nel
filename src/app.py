@@ -1,16 +1,16 @@
 from flask import Flask, request, jsonify
 
-from utils.utils import pickle_load
-from features.preprocessor import PreProcessor
-from models.model import Model
+from src.utils import pickle_load
+from src.features import PreProcessor
+from src.models.model import Model
 
 import numpy as np
 import argparse
 import torch
 import logging
-from utils.file import FileObjectStore
+from src.utils import FileObjectStore
 from os.path import join
-from repr.doc import Doc
+from src.repr import Doc
 
 np.warnings.filterwarnings('ignore')
 

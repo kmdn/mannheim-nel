@@ -5,11 +5,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from models.base import YamadaBase
-from models.loss import Loss
+from src.models.base import Base
+from src.models.loss import Loss
 
 
-class Model(YamadaBase, Loss):
+class Model(Base, Loss):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
