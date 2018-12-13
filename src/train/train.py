@@ -1,7 +1,14 @@
 # Training file for original yamada model
 from datetime import datetime
 import configargparse
+from os.path import join
+import os
+from collections import defaultdict
 
+import numpy as np
+import torch
+
+from src.utils.utils import str2bool, json_load, pickle_load, load_data, send_to_cuda
 from src.train.dataset import Dataset
 from src.train.validator import Validator
 from src.models.model import Model
@@ -251,7 +258,7 @@ if __name__ == '__main__':
 
     Model = get_model(Args, Yamada_model, Logger)
     if Args.pre_train:
-        state_dict = torch.load(Args.pre_train, map_location=Args.device if use_cuda else 'cpu')['state_dict']
+        state_dict = torch.load(Args.pre_train, map_location=Args.device if Args.use_cuda else 'cpu')['state_dict']
         Model.load_state_dict(state_dict)
     train(model=Model,
           train_dataset=Train_dataset,
