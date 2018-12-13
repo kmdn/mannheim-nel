@@ -18,8 +18,6 @@ from src.utils.file import FileObjectStore
 
 np.warnings.filterwarnings('ignore')
 
-DATA_TYPES = ['conll', 'wiki',  'ace2004', 'msnbc']
-
 
 def parse_args():
     parser = configargparse.ArgumentParser(description='Training Wikinet 2',
@@ -36,7 +34,6 @@ def parse_args():
     data.add_argument('--data_path', required=True, type=str, help='location of data dir')
     data.add_argument('--yamada_model', type=str, help='name of yamada model')
     data.add_argument('--data_type', type=str, choices=['conll', 'wiki', 'proto'], help='whether to train with conll or wiki')
-    data.add_argument('--num_shards', type=int, help='number of shards of training file')
     data.add_argument('--train_size', type=int, help='number of training abstracts')
     data.add_argument('--mmaps', type=str2bool, help='use dicts or mmaps')
     data.add_argument('--data_types', type=str, help='name of datasets separated by comma')
@@ -60,7 +57,6 @@ def parse_args():
     # Candidate Generation
     candidate = parser.add_argument_group('Candidate generation.')
     candidate.add_argument('--cand_type', choices=['necounts', 'pershina'], help='whether to use pershina candidates')
-    candidate.add_argument('--cand_gen_rand', type=str2bool, help='whether to generate random candidates')
     candidate.add_argument("--num_candidates", type=int, default=32, help="Total number of candidates")
     candidate.add_argument("--prop_gen_candidates", type=float, default=0.5, help="Proportion of candidates generated")
     candidate.add_argument("--coref", type=str2bool, default=False, help="Whether to use coref cands")
@@ -80,16 +76,10 @@ def parse_args():
                               help='optimizer for paramaters that are not embeddings')
     training.add_argument('--sparse', type=str2bool, help='sparse gradients')
 
-    # Loss
-    loss = parser.add_argument_group('Type of loss.')
-    loss.add_argument('--loss_func', type=str, default='cross_entropy', choices=['cross_entropy', 'cosine'],
-                      help='loss function')
-    loss.add_argument('--margin', type=float, help='margin of hinge loss')
-
     # cuda
     parser.add_argument("--device", type=str, help="cuda device")
     parser.add_argument("--use_cuda", type=str2bool, help="use gpu or not")
-    parser.add_argument("--profile", type=str2bool, help="whether to run profiler on dataloader and exit")
+    parser.add_argument("--profile", type=str2bool, help="if set will run profiler on dataloader and exit")
 
     args = parser.parse_args()
     logger = get_logger(args)
@@ -184,7 +174,7 @@ def setup(args, logger):
     logger.info("Training dataset created. There will be {len(se")
 
     datasets = {}
-    for data_type in DATA_TYPES:
+    for data_type in args.data_types.split(','):
         datasets[data_type] = Dataset(ent_conditional=conditionals,
                                       ent_prior=priors,
                                       yamada_model=yamada_model,
@@ -228,7 +218,7 @@ def train(model=None,
 
     logger.info("Starting validation for untrained model.")
     validators = {}
-    for data_type in DATA_TYPES:
+    for data_type in args.data_types.split(','):
         loader = datasets[data_type].get_loader(batch_size=args.batch_size,
                                                 shuffle=False,
                                                 num_workers=args.num_workers,

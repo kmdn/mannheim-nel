@@ -218,7 +218,7 @@ class Dataset(object):
                   'ent_strs': ent_str,
                   'label': label,
                   **features_dict}
-        
+
         return output
 
     def __len__(self):
