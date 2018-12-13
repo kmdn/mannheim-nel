@@ -78,6 +78,7 @@ def linking():
     text = content.get('text', '')
     user_mentions = content.get('mentions', [])
     user_spans = content.get('spans', [])
+    doc_id = content.get('doc_id')
 
     if not user_mentions:
         return jsonify({'mentions': user_mentions, 'entities': [], 'spans': user_spans}), 201
@@ -85,7 +86,8 @@ def linking():
     doc = Doc(text,
               mentions=user_mentions,
               spans=user_spans,
-              file_stores=File_stores)
+              file_stores=File_stores,
+              doc_id=doc_id)
 
     model_input = processor.process(doc)
     candidate_strs = model_input['candidate_strs']

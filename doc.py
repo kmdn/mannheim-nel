@@ -9,10 +9,11 @@ MAX_CONTEXT = 200
 
 class Doc:
 
-    def __init__(self, text, mentions=None, spans=None, file_stores=None):
+    def __init__(self, text, mentions=None, spans=None, file_stores=None, doc_id=None):
         self.text = text
         self.tokenizer = RegexpTokenizer()
         self.word_dict = file_stores['word_dict']
+        self.doc_id = doc_id
 
         if not mentions or not spans:
             mentions, spans = self._get_mentions()
@@ -25,6 +26,7 @@ class Doc:
     def _get_mentions(self):
         spacy_doc = nlp(self.text)
         strings = [ent.text for ent in spacy_doc.ents if not ent.label_ in ENT_FILTER]
+        strings.extend([token for token in spacy_doc if token.text.isupper()])
         spans = [(ent.start_char, ent.end_char) for ent in spacy_doc.ents if not ent.label_ in ENT_FILTER]
 
         return strings, spans

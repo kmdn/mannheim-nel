@@ -9,7 +9,8 @@ class Mention:
                  text,
                  span,
                  cluster_mention=None,
-                 file_stores=None):
+                 file_stores=None,
+                 ent_str=None):
 
         self.text = text
         self.begin, self.end = span
