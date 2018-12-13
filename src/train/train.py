@@ -38,7 +38,7 @@ def parse_args():
     data.add_argument('--data_type', type=str, choices=['conll', 'wiki', 'proto'], help='whether to train with conll or wiki')
     data.add_argument('--num_shards', type=int, help='number of shards of training file')
     data.add_argument('--train_size', type=int, help='number of training abstracts')
-    data.add_argument('--mmap', type=str2bool, help='use dicts or mmaps')
+    data.add_argument('--mmaps', type=str2bool, help='use dicts or mmaps')
     data.add_argument('--data_types', type=str, help='name of datasets separated by comma')
 
     # Max Padding
@@ -128,7 +128,7 @@ def setup(args, logger):
     yamada_model = pickle_load(join(args.data_path, 'yamada', args.yamada_model))
     logger.info("Model loaded.")
 
-    if args.mmap:
+    if args.mmaps:
         priors = FileObjectStore(join(args.data_path, "mmaps", 'str_prior'))
         conditionals = FileObjectStore(join(args.data_path, "mmaps", 'str_cond'))
         necounts = FileObjectStore(join(args.data_path, "mmaps", "str_necounts"))
