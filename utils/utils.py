@@ -22,8 +22,6 @@ def np_to_tensor(a):
     else:
         return a
 
-from src.models.models import Models
-
 use_cuda = torch.cuda.is_available()
 RE_WS_PRE_PUCT = re.compile(u'\s+([^a-zA-Z\d])')
 RE_WIKI_ENT = re.compile(r'.*wiki\/(.*)')
@@ -161,21 +159,6 @@ def str2bool(v):
         return True
     elif v.lower() in ('no', 'false', 'f', 'n', '0'):
         return False
-
-
-def get_model(**kwargs):
-    """Based on parameters in args, initialize and return appropriate model."""
-
-    args = kwargs['args']
-
-    model_type = getattr(Models, args.model_name)
-    model = model_type(**kwargs)
-
-    if args.use_cuda:
-        model = send_to_cuda(args.device, model)
-    logger.info('{} Model created.'.format(model_type.__name__))
-
-    return model
 
 
 def send_to_cuda(device, model):
