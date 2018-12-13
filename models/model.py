@@ -1,4 +1,6 @@
 # Entity linking MLP.
+import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -16,19 +18,15 @@ class Model(YamadaBase, Loss):
         self.output = nn.Linear(self.args.hidden_size, 1)
 
     def forward(self, input_dict):
-        # Unpack
-
-        candidate_ids = torch.from_numpy(input_dict['candidate_ids'])
-        context = torch.from_numpy(input_dict['context'])
-        priors = torch.from_numpy(input_dict['priors']).float()
-        conditionals = torch.from_numpy(input_dict['conditionals']).float()
-        exact_match = torch.from_numpy(input_dict['exact_match']).float()
-        contains = torch.from_numpy(input_dict['contains']).float()
-        b, num_cand = candidate_ids.shape
+        # Conver to tensor if input is numpy
+        for k, v in input_dict.items():
+            if isinstance(v, np.ndarray):
+                input_dict[k] = torch.from_numpy(v).float()
+        b, num_cand = input_dict['candidate_ids'].shape
 
         # Get the embeddings
-        candidate_embs = self.ent_embs(candidate_ids)
-        context_embs = self.word_embs(context)
+        candidate_embs = self.ent_embs(input_dict['candidate_ids'])
+        context_embs = self.word_embs(input_dict['context'])
 
         # Aggregate context
         context_embs = context_embs.mean(dim=len(context_embs.shape) - 2)
@@ -42,13 +40,12 @@ class Model(YamadaBase, Loss):
 
         # Unsqueeze in second dimension
         dot_product = dot_product.unsqueeze(dim=2)
-        priors = priors.unsqueeze(dim=2)
-        conditionals = conditionals.unsqueeze(dim=2)
-        exact_match = exact_match.unsqueeze(dim=2)
-        contains = contains.unsqueeze(dim=2)
+        priors = input_dict['priors'].unsqueeze(dim=2)
+        conditionals = input_dict['conditionals'].unsqueeze(dim=2)
+        exact_match = input_dict['exact_match'].unsqueeze(dim=2)
+        contains = input_dict['contains'].unsqueeze(dim=2)
 
         # Create input for mlp
-        context_embs = context_embs.expand(-1, num_cand, -1)
         input = self.dp(torch.cat((context_embs,
                                    dot_product,
                                    candidate_embs,
