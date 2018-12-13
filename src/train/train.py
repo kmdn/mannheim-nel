@@ -193,7 +193,8 @@ def setup(args, logger):
 
 
 def get_model(args, yamada_model, logger):
-    model = Model(yamada_model=yamada_model, args=args)
+
+    model = Model(**yamada_model, args=args)
 
     if args.use_cuda:
         model = send_to_cuda(args.device, model)
