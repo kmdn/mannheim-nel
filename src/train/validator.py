@@ -4,7 +4,7 @@ import numpy as np
 from torch.autograd import Variable
 from logging import getLogger
 
-from src.utils import reverse_dict
+from src.utils.utils import reverse_dict
 
 np.set_printoptions(threshold=10**6)
 
