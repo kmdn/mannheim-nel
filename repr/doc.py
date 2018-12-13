@@ -1,6 +1,6 @@
-from mention import Mention
+from repr.mention import Mention
 import spacy
-from tokenizer import RegexpTokenizer
+from utils.tokenizer import RegexpTokenizer
 
 nlp = spacy.load('en')
 ENT_FILTER = {'CARDINAL', 'DATE', 'TIME', 'PERCENT', 'MONEY', 'QUANTITY', 'ORDINAL'}
@@ -9,27 +9,28 @@ MAX_CONTEXT = 200
 
 class Doc:
 
-    def __init__(self, text, mentions=None, spans=None, file_stores=None, doc_id=None):
+    def __init__(self, text, text_spans=None, file_stores=None, doc_id=None):
         self.text = text
         self.tokenizer = RegexpTokenizer()
         self.word_dict = file_stores['word_dict']
         self.doc_id = doc_id
 
-        if not mentions or not spans:
-            mentions, spans = self._get_mentions()
-        self.mention_strings = mentions
-        self.mention_spans = spans
-        self.mentions = [Mention(text, span, file_stores=file_stores) for text, span in zip(mentions, spans)]
+        if not text_spans:
+            text_spans = self._get_mentions()
+        self.mentions = [Mention(text_span, file_stores=file_stores) for text_span in text_spans]
 
         self.assign_clusters()
 
     def _get_mentions(self):
         spacy_doc = nlp(self.text)
-        strings = [ent.text for ent in spacy_doc.ents if not ent.label_ in ENT_FILTER]
-        strings.extend([token for token in spacy_doc if token.text.isupper()])
-        spans = [(ent.start_char, ent.end_char) for ent in spacy_doc.ents if not ent.label_ in ENT_FILTER]
+        text_spans = [(ent.text, (ent.start_char, ent.end_char))
+                     for ent in spacy_doc.ents if not ent.label_ in ENT_FILTER and len(ent.text) > 2]
+        # text_spans.extend([(token.text, (token.idx, token.idx + len(token.text)))
+        #                  for token in spacy_doc if token.text.isupper() and len(token.text) > 2])
 
-        return strings, spans
+        # text_spans = sorted(text_spans, key=lambda m: m[1][0], reverse=True)
+
+        return text_spans
 
     def assign_clusters(self):
         unchained_mentions = sorted(self.mentions, key=lambda m: m.begin, reverse=True)

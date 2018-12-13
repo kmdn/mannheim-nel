@@ -32,6 +32,7 @@ class PreProcessor(object):
     def _get_stat_feats(self, mention_str, candidates):
         priors = []
         conditionals = []
+        max_doc_probs = []
 
         for candidate in candidates:
             priors.append(self.str_prior.get(candidate, 0))
@@ -57,8 +58,11 @@ class PreProcessor(object):
         all_candidate_strs = []
         all_candidate_ids = []
 
+        # examples_str = str(doc.doc_id) + '\n'
+
         for men_idx, mention in enumerate(doc.mentions):
             all_candidate_strs.append(mention.cands)
+            # examples_str += '||'.join([mention.text] + [mention.ent] + mention.cands) + '\n'
             all_candidate_ids.append([self.ent2id.get(cand, 0) for cand in mention.cands])
 
             exact_match, contains = self._get_string_feats(mention.text, mention.cands)
@@ -68,6 +72,9 @@ class PreProcessor(object):
             priors, conditionals = self._get_stat_feats(mention.text, mention.cands)
             all_priors.append(priors)
             all_conditionals.append(conditionals)
+
+        # with open(f'/home/rohitalyosha/Student_Job/mannheim-nel/data/cands/{doc.doc_id}', 'w') as f:
+        #     f.write(examples_str)
 
         ret = {'context': np.array(context_tokens, dtype=np.int64),
                'candidate_ids': np.array(all_candidate_ids, dtype=np.int64),

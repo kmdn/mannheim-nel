@@ -6,14 +6,13 @@ MAX_CANDS = 100
 class Mention:
 
     def __init__(self,
-                 text,
-                 span,
+                 text_span,
                  cluster_mention=None,
                  file_stores=None,
                  ent_str=None):
 
-        self.text = text
-        self.begin, self.end = span
+        self.text = text_span[0]
+        self.begin, self.end = text_span[1]
         self.cluster_mention = cluster_mention
         self.necounts = file_stores['str_necounts']
         self.rd = file_stores['redirects']
