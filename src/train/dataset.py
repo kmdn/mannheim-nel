@@ -3,6 +3,7 @@
 import torch.utils.data
 from more_itertools import unique_everseen
 from src.utils.tokenizer import RegexpTokenizer
+from src.utils.utils import reverse_dict
 import random
 
 from logging import getLogger
