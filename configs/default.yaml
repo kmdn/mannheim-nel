@@ -7,7 +7,6 @@ debug:False
 data_type:conll
 data_path:/work/rogupta/wikinet_data
 yamada_model:yamada_model.pickle
-num_shards:0
 train_size:0
 mmaps:False
 data_types:conll
@@ -23,7 +22,6 @@ dp:0.2
 
 # Candidate Generation
 cand_type:necounts
-cand_gen_rand:False
 num_candidates:128
 prop_gen_candidates:0.75
 
@@ -38,10 +36,6 @@ embs_optim:rmsprop
 other_optim:rmsprop
 sparse:False
 save_every:5
-
-# Loss
-margin:0.5
-loss_func:cross_entropy
 
 # Cuda
 use_cuda:True
