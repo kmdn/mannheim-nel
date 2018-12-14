@@ -118,8 +118,8 @@ def setup(args, logger):
     yamada_model = pickle_load(join(args.data_path, 'yamada', args.yamada_model))  # TODO: fix this
     ent_dict = yamada_model['ent_dict']
     word_dict = yamada_model['word_dict']
-    word_embs = yamada_model['word_embs']
-    ent_embs = yamada_model['ent_embs']
+    word_embs = yamada_model['word_emb']
+    ent_embs = yamada_model['ent_emb']
     w = yamada_model['W']
     b = yamada_model['b']
     logger.info("Model loaded.")
