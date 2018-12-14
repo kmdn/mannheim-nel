@@ -13,37 +13,20 @@ class PreProcessor(object):
 
     @staticmethod
     def _get_string_feats(mention_str, candidate_strs):
-        exact_match = []
-        contains = []
-
-        for candidate_str in candidate_strs:
-            if mention_str == candidate_str or mention_str in candidate_str:
-                exact_match.append(1)
-            else:
-                exact_match.append(0)
-
-            if candidate_str.startswith(mention_str) or candidate_str.endswith(mention_str):
-                contains.append(1)
-            else:
-                contains.append(0)
+        exact_match = [1 if mention_str in candidate_str else 0 for candidate_str in candidate_strs]
+        contains = [1 if candidate_str.startswith(mention_str) or candidate_str.endswith(mention_str) else 0
+                    for candidate_str in candidate_strs]
 
         return exact_match, contains
 
     def _get_stat_feats(self, mention_str, candidates):
-        priors = []
-        conditionals = []
-        max_doc_probs = []
+        nf = normalise_form(mention_str)
+        priors = [self.str_prior.get(candidate, 0) for candidate in candidates]
 
-        for candidate in candidates:
-            priors.append(self.str_prior.get(candidate, 0))
-            nf = normalise_form(mention_str)
-            if nf in self.str_cond:
-                conditionals.append(self.str_cond[nf].get(candidate, 0))
-            else:
-                conditionals.append(0)
-
-        if len(priors) == 0 or len(conditionals) == 0:
-            print(mention_str, candidates)
+        if nf in self.str_cond:
+            conditionals = [self.str_cond[nf].get(candidate, 0) for candidate in candidates]
+        else:
+            conditionals = np.zeros(len(candidates))
 
         return priors, conditionals
 
@@ -79,9 +62,9 @@ class PreProcessor(object):
         ret = {'context': np.array(context_tokens, dtype=np.int64),
                'candidate_ids': np.array(all_candidate_ids, dtype=np.int64),
                'candidate_strs': np.array(all_candidate_strs),
-               'priors': np.array(all_priors),
-               'conditionals': np.array(all_conditionals),
-               'exact_match': np.array(all_exact_match),
-               'contains': np.array(all_contains)}
+               'priors': np.array(all_priors, dtype=np.float32),
+               'conditionals': np.array(all_conditionals, dtype=np.float32),
+               'exact_match': np.array(all_exact_match, dtype=np.float32),
+               'contains': np.array(all_contains, dtype=np.float32)}
 
         return ret

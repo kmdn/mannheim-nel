@@ -8,7 +8,7 @@ import os
 from os.path import join
 import sys
 import logging
-import gensim
+# import gensim
 import pickle
 
 import numpy as np

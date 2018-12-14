@@ -129,13 +129,13 @@ def setup(args, logger):
         conditionals = FileObjectStore(join(args.data_path, "mmaps", 'str_cond'))
         necounts = FileObjectStore(join(args.data_path, "mmaps", "str_necounts"))
         redirects = FileObjectStore(join(args.data_path, "mmaps", 'redirects'))
-        dis_dict = FileObjectStore(join(args.data_path, "mmaps", 'disamb'))
+        disamb = FileObjectStore(join(args.data_path, "mmaps", 'disamb'))
     else:
         priors = json_load(join(args.data_path, "dicts", 'str_prior.json'))
         conditionals = json_load(join(args.data_path, "dicts", 'str_cond.json'))
         necounts = json_load(join(args.data_path, "dicts", "str_necounts.json"))
         redirects = json_load(join(args.data_path, "dicts", 'redirects.json'))
-        dis_dict = json_load(join(args.data_path, "dicts", 'disamb.json'))
+        disamb = json_load(join(args.data_path, "dicts", 'disamb.json'))
 
     logger.info("Using {} for training.....".format(args.data_type))
     data = defaultdict(dict)
@@ -176,7 +176,7 @@ def setup(args, logger):
                             cand_type=(args.cand_type if args.data_type == 'conll' else 'necounts'),
                             necounts=necounts,
                             redirects=redirects,
-                            dis_dict=dis_dict,
+                            dis_dict=disamb,
                             coref=(args.coref if args.data_type != 'wiki' else False))
     logger.info("Training dataset created. There will be {len(se")
 
@@ -193,7 +193,7 @@ def setup(args, logger):
                                       cand_type=(args.cand_type if args.data_type == 'conll' else 'necounts'),
                                       necounts=necounts,
                                       redirects=redirects,
-                                      dis_dict=dis_dict,
+                                      dis_dict=disamb,
                                       coref=(args.coref if args.data_type != 'wiki' else False))
         logger.info(f"{data_type} dev dataset created.")
 

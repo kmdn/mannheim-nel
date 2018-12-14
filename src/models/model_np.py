@@ -1,12 +1,8 @@
+# Numpy version of model
 import numpy as np
-from src.utils import normalize, relu
-from flask import Flask
+from src.utils.utils import normalize, relu
 
 import torch
-DATA_PATH = '/home/rohitalyosha/Student_Job/mannheim-nel/data/profile/'
-
-app = Flask(__name__)
-np.set_printoptions(threshold=10**6)
 
 
 class NEL(object):

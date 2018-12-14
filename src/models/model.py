@@ -21,7 +21,7 @@ class Model(Base, Loss):
         # Conver to tensor if input is numpy
         for k, v in input_dict.items():
             if isinstance(v, np.ndarray):
-                input_dict[k] = torch.from_numpy(v).float()
+                input_dict[k] = torch.from_numpy(v)
         b, num_cand = input_dict['candidate_ids'].shape
 
         # Get the embeddings

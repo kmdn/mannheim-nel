@@ -115,7 +115,7 @@ class Dataset(object):
         context = self.id2context[doc_id]
         context = context[5:] if self.args.ignore_init else context
         if isinstance(context, str):
-            context = [self.word_dict.get(token.text, 0) for token in self.word_tokenizer.tokenize(context)]
+            context = [self.word_dict.get(token, 0) for token in self.word_tokenizer.tokenize(context)]
         elif isinstance(context, tuple) and isinstance(context[0], str):
             context = [self.word_dict.get(token.lower(), 0) for token in context]
         context = np.array(equalize_len(context, self.args.max_context_size, pad=0))

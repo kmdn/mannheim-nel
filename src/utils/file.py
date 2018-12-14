@@ -80,7 +80,7 @@ class mmdict(object):
 
         index_path = self.path + '.index'
         if os.path.exists(index_path):
-            app.logger.debug('Loading mmap store: %s ...' % index_path)
+            app.logger.info('Loading mmap store: %s ...' % index_path)
             with open(index_path, 'rb') as f:
                 self.index = dict(self.deserialise(f))
 

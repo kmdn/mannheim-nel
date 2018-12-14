@@ -1,12 +1,11 @@
 # Coreference Resolution
-ENT_FILTER = {'CARDINAL', 'DATE', 'TIME', 'PERCENT', 'MONEY', 'QUANTITY', 'ORDINAL'}
 
 
-class Coref:
+class HeuresticCorefResolver:
 
     @staticmethod
-    def heurestic_coref(doc):
-        unchained_mentions = sorted(doc.mentions, key=lambda m: m.begin, reverse=True)
+    def coref(mentions):
+        unchained_mentions = sorted(mentions, key=lambda m: m.begin, reverse=True)
 
         while unchained_mentions:
             mention = unchained_mentions.pop(0)
