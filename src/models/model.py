@@ -33,6 +33,9 @@ class Model(Base, Loss):
 
         # Normalize / Pass through linear layer / Unsqueeze
         context_embs = self.orig_linear(F.normalize(context_embs, dim=len(context_embs.shape) - 1))
+        if len(context_embs.shape) == 1:
+            context_embs = context_embs.unsqueeze(0)
+        context_embs = context_embs.unsqueeze(1)
         context_embs = context_embs.expand(*candidate_embs.shape)
 
         # Dot product over last dimension

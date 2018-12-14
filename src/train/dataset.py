@@ -199,7 +199,7 @@ class Dataset(object):
             ent_str = self.redirects.get(ent_str, ent_str)
             cand_ids, cand_strs, not_in_cand, label = self._get_coref_cands(ent_str, cand_gen_strs)
         else:
-            doc_id, (mention_str, ent_str, _, _ ) = self.examples[index]
+            doc_id, (mention_str, ent_str, _, _) = self.examples[index]
             ent_str = self.redirects.get(ent_str, ent_str)
             if self.cand_type == 'necounts':
                 cand_ids, cand_strs, not_in_cand, label = self._gen_cands(ent_str, mention_str)
@@ -231,8 +231,7 @@ class Dataset(object):
                    sampler=None,
                    pin_memory=True,
                    drop_last=True,
-                   num_workers=4
-                   ):
+                   num_workers=4):
 
         return torch.utils.data.DataLoader(self,
                                            batch_size=batch_size,
