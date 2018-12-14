@@ -12,6 +12,8 @@ from src.utils.multi_optim import MuliOptim
 
 logger = logging.getLogger()
 
+TOP_VALID = 1  # use conll top1 as validity metric for combined model
+
 
 class Trainer(object):
 
@@ -108,12 +110,10 @@ class Trainer(object):
         wait = 0
         num_batches = len(self.loader)
         tenth_batch = num_batches // 10
-        TOP_VALID = 1
 
         logger.info("Validating untrained model.....")
         best_model = self.model
-        full_results = self.validate('Untrained')
-        best_results = {data_type: result[TOP_VALID] if isinstance(result, dict) else result for data_type, result in full_results.items()}
+        best_results = self.validate('Untrained')
         best_valid_metric = best_results['conll']
         logger.info("Done validating.")
 
@@ -144,11 +144,10 @@ class Trainer(object):
                     filename=join(self.model_dir, '{}.ckpt'.format(epoch)))
 
             results = self.validate(epoch)
-            valid_metric = results['conll'][TOP_VALID] if isinstance(results['conll'], dict) else results['conll']
+            valid_metric = results['conll']
             for data_type, result in results.items():
-                top1 = result[1] if isinstance(result, dict) else result
-                if top1 > best_results[data_type]:
-                    best_results[data_type] = top1
+                if result > best_results[data_type]:
+                    best_results[data_type] = result
 
             self.optimizer.scheduler_step(valid_metric)
 
