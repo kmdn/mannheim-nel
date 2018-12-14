@@ -115,7 +115,13 @@ def setup(args, logger):
 
     print()
     logger.info("Loading Yamada model.....")
-    yamada_model = pickle_load(join(args.data_path, 'yamada', args.yamada_model))
+    yamada_model = pickle_load(join(args.data_path, 'yamada', args.yamada_model))  # TODO: fix this
+    ent_dict = yamada_model['ent_dict']
+    word_dict = yamada_model['word_dict']
+    word_embs = yamada_model['word_embs']
+    ent_embs = yamada_model['ent_embs']
+    w = yamada_model['W']
+    b = yamada_model['b']
     logger.info("Model loaded.")
 
     if args.mmaps:
@@ -161,7 +167,8 @@ def setup(args, logger):
     logger.info("Creating data loaders and validators.....")
     train_dataset = Dataset(ent_conditional=conditionals,
                             ent_prior=priors,
-                            yamada_model=yamada_model,
+                            ent_dict=ent_dict,
+                            word_dict=word_dict,
                             data=train_data,
                             split='train',
                             data_type=args.data_type,
@@ -177,7 +184,8 @@ def setup(args, logger):
     for data_type in args.data_types.split(','):
         datasets[data_type] = Dataset(ent_conditional=conditionals,
                                       ent_prior=priors,
-                                      yamada_model=yamada_model,
+                                      ent_dict=ent_dict,
+                                      word_dict=word_dict,
                                       data=data[data_type]['dev'],
                                       split='dev',
                                       data_type=args.data_type,
@@ -189,12 +197,16 @@ def setup(args, logger):
                                       coref=(args.coref if args.data_type != 'wiki' else False))
         logger.info(f"{data_type} dev dataset created.")
 
-    return train_dataset, datasets, yamada_model
+    return train_dataset, datasets, word_embs, ent_embs, w, b, word_dict, ent_dict
 
 
-def get_model(args, yamada_model, logger):
+def get_model(args, word_embs, ent_embs, w, b, logger):
 
-    model = Model(**yamada_model, args=args)
+    model = Model(word_embs=word_embs,
+                  ent_embs=ent_embs,
+                  W=w,
+                  b=b,
+                  args=args)
 
     if args.use_cuda:
         model = send_to_cuda(args.device, model)
@@ -208,7 +220,8 @@ def train(model=None,
           datasets=None,
           train_dataset=None,
           args=None,
-          yamada_model=None,
+          ent_dict=None,
+          word_dict=None,
           run=None):
 
     train_loader = train_dataset.get_loader(batch_size=args.batch_size,
@@ -226,8 +239,8 @@ def train(model=None,
                                                 drop_last=False)
         logger.info(f'Len loader {data_type} : {len(loader)}')
         validators[data_type] = Validator(loader=loader, args=args,
-                                          word_dict=yamada_model['word_dict'],
-                                          ent_dict=yamada_model['ent_dict'],
+                                          word_dict=word_dict,
+                                          ent_dict=ent_dict,
                                           data_type=data_type,
                                           run=run)
 
@@ -245,9 +258,9 @@ def train(model=None,
 
 if __name__ == '__main__':
     Args, Logger, Model_dir = parse_args()
-    Train_dataset, Datasets, Yamada_model = setup(Args, Logger)
+    Train_dataset, Datasets, Word_embs, Ent_Embs, W, B, Word_dict, Ent_dict = setup(Args, Logger)
 
-    Model = get_model(Args, Yamada_model, Logger)
+    Model = get_model(Args, Word_embs, Ent_Embs, W, B, Logger)
     if Args.pre_train:
         state_dict = torch.load(Args.pre_train, map_location=Args.device if Args.use_cuda else 'cpu')['state_dict']
         Model.load_state_dict(state_dict)
@@ -256,4 +269,5 @@ if __name__ == '__main__':
           datasets=Datasets,
           logger=Logger,
           args=Args,
-          yamada_model=Yamada_model)
+          word_dict=Word_dict,
+          ent_dict=Ent_dict)

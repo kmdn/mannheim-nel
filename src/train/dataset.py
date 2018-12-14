@@ -18,7 +18,8 @@ class Dataset(object):
     def __init__(self,
                  ent_prior=None,
                  ent_conditional=None,
-                 yamada_model=None,
+                 ent_dict=None,
+                 word_dict=None,
                  data=None,
                  args=None,
                  cand_rand=False,
@@ -34,10 +35,10 @@ class Dataset(object):
         self.args = args
         self.num_candidates = self.args.num_candidates
         self.num_cand_gen = int(self.num_candidates * self.args.prop_gen_candidates)
-        self.ent2id = yamada_model['ent_dict']
+        self.ent2id = ent_dict
         self.len_ent = len(self.ent2id)
         self.id2ent = reverse_dict(self.ent2id)
-        self.word_dict = yamada_model['word_dict']
+        self.word_dict = word_dict
         self.max_ent = len(self.ent2id)
         self.ent_prior = ent_prior
         self.ent_conditional = ent_conditional

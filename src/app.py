@@ -19,7 +19,7 @@ app = Flask(__name__)
 
 def setup(data_path, args):
     app.logger.info('loading models params.....')
-    model_params = pickle_load(join(data_path, 'models/conll-model-256.pickle'))
+    model_params = pickle_load(join(data_path, f'models/{args.model}'))
     ent_embs = model_params['ent_embs.weight']
     word_embs = model_params['word_embs.weight']
     app.logger.info('yamada models loaded.')
@@ -60,7 +60,6 @@ def linking():
     text = content.get('text', '')
     user_mentions = content.get('mentions', [])
     user_spans = content.get('spans', [])
-    doc_id = content.get('doc_id')
 
     doc = Doc(text,
               file_stores=File_stores,
@@ -88,19 +87,19 @@ def linking():
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="service for mannheim-nel",
+    parser = argparse.ArgumentParser(description="flask app for mannheim-nel",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-d', '--data_path', required=True, help='path to data directory')
+    parser.add_argument('-m', '--model', required=True, help='model name, must be in {data_path}/models')
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)-8s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
 
-    # Hack: need this as it is included in model defination
+    # Hack: need this as it is included in model definition
     Args = parser.parse_args()
     Args.dp = 0.0
 
     Data_path = Args.data_path
     processor, nel, File_stores = setup(Data_path, Args)
 
-    app.logger.info('setup complete.')
-    app.logger.info('app online.')
+    app.logger.info('Setup complete, app online.')
     app.run()
