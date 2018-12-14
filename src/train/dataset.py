@@ -212,7 +212,7 @@ class Dataset(object):
             context = self.processed_id2context[str(doc_id)]
         features_dict = self._gen_features(mention_str, cand_strs)
 
-        output = {'cand_ids': cand_ids,
+        output = {'candidate_ids': cand_ids,
                   'not_in_cand': not_in_cand,
                   'context': context,
                   'cand_strs': cand_strs,
