@@ -28,7 +28,7 @@ class Trainer(object):
         self.grid_results_dict = grid_results_dict
         self.result_key = result_key
         self.profile = profile
-        self.data_types = ['conll', 'wiki', 'msnbc', 'ace2004']
+        self.data_types = self.args.data_types.split(',')
         self.batch_size = args.batch_size
         self.validator = validator
 
