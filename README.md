@@ -1,9 +1,10 @@
 # MEL: Mannheim Entity Linking
 MEL is a Python library whose goal is to provide an efficient and easy to use end-to-end Entity Linking system.
 Entity Linking is the task of linking mentions in free text to entities in a Knowledge Base (in our case Wikipedia).
-MEL uses Entitiy and Word Embeddings trained by [ntee](https://github.com/studio-ousia/ntee) and candidate generation
-approach of [nel](https://github.com/wikilinks/nel) to provide close to state of the art performance. An easy to
-setup bare-bones flask server is also included.
+MEL uses [spacy](https://spacy.io/) for mention detection, Entitiy and Word Embeddings trained by 
+[ntee](https://github.com/studio-ousia/ntee) for linking, and a candidate generation approach of
+[nel](https://github.com/wikilinks/nel) to provide close to state of the art performance. An easy to
+setup (bare-bones) flask server is also included.
 
 # Dependencies:
 * Python 3 with Numpy
@@ -26,6 +27,24 @@ chmod +x bin/setup.sh
 bin/setup.sh
 ```
 Note: this may take a long time depending on your internet connection.
+
+
+# Flask server
+
+Setting up a server is as easy as running
+```python app.py --data_path data --model conll_v0.1.pt```
+
+# Performance
+
+We compare against the popular [TagMe](https://tagme.d4science.org/tagme/) system and report F1 scores on the combined
+mention detection and entity linking task. For mention detection, any predicted mentions with over 80% overlap with 
+gold mentions were considered a match. TagMe allows to filter Entity Linking using a confidence parameter, here we show
+results for three different values for a fair comparison:
+
+| Data Set  | MEL  | TagMe (Threshold 0.1) | TagMe (Threshold 0.3) | TagMe (Threshold 0.5) |
+| Conll-Dev | 0.67 |        0.39           |        0.52           |        0.33           |
+| MSNBC     | 0.64 |        0.28           |        0.46           |        0.23           |
+
 
 
 
