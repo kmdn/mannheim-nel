@@ -12,7 +12,6 @@ from src.features.coref import HeuresticCorefResolver
 from src.features.candidates import NelCandidateGenerator
 from src.models.mlpmodel import MLPModel
 from src.utils.file import FileObjectStore
-from src.utils.utils import pickle_load
 from src.repr.doc import Doc
 
 
@@ -102,8 +101,10 @@ def linking():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="flask app for mannheim-nel",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-d', '--data_path', required=True, help='path to data directory')
-    parser.add_argument('-m', '--model', required=True, help='model name, must be in {data_path}/models')
+    parser.add_argument('--data_path', required=True, help='path to data directory')
+    parser.add_argument('--model', required=True, help='model name, must be in {data_path}/models')
+    parser.add_argument('--port', type=int, default=5000, help='port of flask server')
+    parser.add_argument('--host', default='127.0.0.1', help='server host')
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)-8s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -114,5 +115,5 @@ if __name__ == '__main__':
     Data_path = Args.data_path
     processor, Coref_resolver, Detector, Candidate_generator, Model, File_stores = setup(Data_path, Args)
 
+    app.run(host=Args.host, port=Args.port)
     app.logger.info('Setup complete, app online.')
-    app.run()
