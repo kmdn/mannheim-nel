@@ -11,7 +11,7 @@ import torch
 from src.utils.utils import str2bool, json_load, pickle_load, load_data, send_to_cuda
 from src.train.dataset import Dataset
 from src.train.validator import Validator
-from src.models.model import Model
+from src.models.mlpmodel import MLPModel
 from src.utils.logger import get_logger
 from src.train.trainer import Trainer
 from src.utils.file import FileObjectStore

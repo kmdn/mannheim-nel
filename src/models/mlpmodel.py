@@ -5,20 +5,44 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from src.models.base import Base
+# from src.models.base import Base
 from src.models.loss import Loss
 
 
-class Model(Base, Loss):
-
+class MLPModel(Loss, nn.Module):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__()
 
+        word_embs = kwargs['word_embs']
+        ent_embs = kwargs['ent_embs']
+
+        self.args = kwargs['args']
+
+        self.emb_dim = word_embs.shape[1]
+        self.num_ent = ent_embs.shape[0]
+
+        # Words
+        self.word_embs = nn.Embedding(*word_embs.shape, padding_idx=0, sparse=True)
+        self.word_embs.weight.data.copy_(torch.from_numpy(word_embs) if isinstance(word_embs, np.ndarray) else word_embs)
+        self.word_embs.weight.requires_grad = False
+
+        # Entities
+        self.ent_embs = nn.Embedding(*ent_embs.shape, padding_idx=0, sparse=True)
+        self.ent_embs.weight.data.copy_(torch.from_numpy(ent_embs) if isinstance(ent_embs, np.ndarray) else ent_embs)
+        self.ent_embs.weight.requires_grad = False
+
+        # Pre trained linear layer
+        self.orig_linear = nn.Linear(word_embs.shape[1], ent_embs.shape[1])
+
+        # MLP Layers
         self.hidden = nn.Linear(5 + 2 * self.emb_dim, self.args.hidden_size)
         self.output = nn.Linear(self.args.hidden_size, 1)
 
+        # Dropout
+        self.dp = nn.Dropout(self.args.dp)
+
     def forward(self, input_dict):
-        # Conver to tensor if input is numpy
+        # Convert to tensor if input is numpy
         for k, v in input_dict.items():
             if isinstance(v, np.ndarray):
                 input_dict[k] = torch.from_numpy(v)

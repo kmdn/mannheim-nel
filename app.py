@@ -6,13 +6,13 @@ from os.path import join
 import torch
 import logging
 
-from src.utils.utils import pickle_load
 from src.features.preprocessor import PreProcessor
 from src.features.detector import SpacyDetector
 from src.features.coref import HeuresticCorefResolver
 from src.features.candidates import NelCandidateGenerator
-from src.models.model import Model
+from src.models.mlpmodel import MLPModel
 from src.utils.file import FileObjectStore
+from src.utils.utils import pickle_load
 from src.repr.doc import Doc
 
 
@@ -23,9 +23,12 @@ app = Flask(__name__)
 
 def setup(data_path, args):
     app.logger.info('loading models params.....')
-    model_params = pickle_load(join(data_path, f'models/{args.model}'))
-    ent_embs = model_params['ent_embs.weight']
-    word_embs = model_params['word_embs.weight']
+    if args.model.endswith('ckpt'):
+        state_dict = torch.load(join(data_path, f'models/{args.model}'), map_location='cpu')['state_dict']
+    else:
+        state_dict = pickle_load(join(data_path, f'models/{args.model}'))
+    ent_embs = state_dict['ent_embs.weight']
+    word_embs = state_dict['word_embs.weight']
     app.logger.info('yamada models loaded.')
 
     app.logger.info('creating file stores.....')
@@ -44,23 +47,18 @@ def setup(data_path, args):
                                                 str_necounts=file_stores['str_necounts'])
     app.logger.info('created')
 
-    args.hidden_size = model_params['hidden.weight'].shape[1]
+    args.hidden_size = state_dict['hidden.weight'].shape[0]
 
-    app.logger.info('creating models.....')
-    nel = Model(ent_embs=ent_embs,
-                word_embs=word_embs,
-                W=model_params['orig_linear.weight'],
-                b=model_params['orig_linear.bias'],
-                args=args)
-    nel.hidden.weight.data = torch.from_numpy(model_params['hidden.weight'])
-    nel.hidden.bias.data = torch.from_numpy(model_params['hidden.bias'])
-    nel.output.weight.data = torch.from_numpy(model_params['output.weight'])
-    nel.output.bias.data = torch.from_numpy(model_params['output.bias'])
-    nel.eval()
+    app.logger.info('creating model.....')
+    model = MLPModel(ent_embs=ent_embs,
+                     word_embs=word_embs,
+                     args=args)
+    model.load_state_dict(state_dict)
+    model.eval()
 
     app.logger.info('models created.')
 
-    return processor, coref_resolver, detector, candidate_generator, nel, file_stores
+    return processor, coref_resolver, detector, candidate_generator, model, file_stores
 
 
 @app.route('/link', methods=['GET', 'POST'])
@@ -85,7 +83,7 @@ def linking():
     candidate_strs = input_dict['candidate_strs']
     input_dict.pop('candidate_strs')
 
-    scores, _, _ = nel(input_dict)
+    scores, _, _ = Model(input_dict)
 
     pred_mask = torch.argmax(scores, len(scores.shape) - 1)
     entities = candidate_strs[np.arange(len(candidate_strs)), pred_mask.numpy()].tolist()
@@ -117,7 +115,7 @@ if __name__ == '__main__':
     Args.dp = 0.0
 
     Data_path = Args.data_path
-    processor, Coref_resolver, Detector, Candidate_generator, nel, File_stores = setup(Data_path, Args)
+    processor, Coref_resolver, Detector, Candidate_generator, Model, File_stores = setup(Data_path, Args)
 
     app.logger.info('Setup complete, app online.')
     app.run()
