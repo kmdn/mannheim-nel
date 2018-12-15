@@ -16,13 +16,7 @@ logger = getLogger(__name__)
 class Dataset(object):
 
     def __init__(self,
-                 str_prior=None,
-                 str_cond=None,
-                 ent_dict=None,
-                 word_dict=None,
-                 redirects=None,
-                 necounts=None,
-                 disamb=None,
+                 dicts=None,
                  data=None,
                  args=None,
                  cand_rand=False,
@@ -33,33 +27,35 @@ class Dataset(object):
         super().__init__()
 
         self.args = args
-        self.num_candidates = self.args.num_candidates
-        self.num_cand_gen = int(self.num_candidates * self.args.prop_gen_candidates)
-        self.ent2id = ent_dict
-        self.len_ent = len(self.ent2id)
-        self.id2ent = reverse_dict(self.ent2id)
-        self.word_dict = word_dict
-        self.max_ent = len(self.ent2id)
-        self.str_prior = str_prior
-        self.str_cond = str_cond
-        self.ent_strs = list(self.str_prior.keys())
         self.data_type = data_type
         self.word_tokenizer = RegexpTokenizer()
 
-        # If coref, then there is a special format for which cands have been precomputed.
-        # For file name checkout load_data function in utils file.
-        self.coref = coref
+        # Dicts
+        self.ent2id = dicts['ent_dict']
+        self.len_ent = len(self.ent2id)
+        self.id2ent = reverse_dict(self.ent2id)
+        self.word_dict = dicts['word_dict']
+        self.max_ent = len(self.ent2id)
+        self.str_prior = dicts['str_prior']
+        self.str_cond = dicts['str_cond']
+        self.redirects = dicts['redirects']
+        self.disamb = dicts['disamb']
+        self.str_necounts = dicts['str_necounts']
+        self.ent_strs = list(self.str_prior.keys())
 
-        self.redirects = redirects
-        self.disamb = disamb
-
+        # Candidates
+        self.num_candidates = self.args.num_candidates
+        self.num_cand_gen = int(self.num_candidates * self.args.prop_gen_candidates)
         self.cand_rand = cand_rand
         self.cand_type = cand_type
         if self.cand_rand:
             self.num_candidates = 10 ** 6
 
-        self.necounts = necounts
+        # If coref, then there is a special format for which cands have been precomputed.
+        # For file name checkout load_data function in utils file.
+        self.coref = coref
 
+        # Training data and context
         id2context, examples = data
         self.examples = examples
         self.id2context = id2context
@@ -88,8 +84,8 @@ class Dataset(object):
         cand_gen_strs = self.add_dismb_cands([], mention)
         nfs = get_normalised_forms(mention)
         for nf in nfs:
-            if nf in self.necounts:
-                cand_gen_strs.extend(self.necounts[nf])
+            if nf in self.str_necounts:
+                cand_gen_strs.extend(self.str_necounts[nf])
 
         cand_gen_strs = list(unique_everseen(cand_gen_strs[:self.num_cand_gen]))
         if ent_str in cand_gen_strs:

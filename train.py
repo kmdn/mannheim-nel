@@ -157,7 +157,7 @@ def setup(args, logger):
                             args=args,
                             cand_type=(args.cand_type if args.data_type == 'conll' else 'necounts'),
                             coref=(args.coref if args.data_type != 'wiki' else False),
-                            **dicts)
+                            dicts=dicts)
     logger.info("Training dataset created. There will be {len(se")
 
     datasets = {}
@@ -168,7 +168,7 @@ def setup(args, logger):
                                       args=args,
                                       cand_type=(args.cand_type if args.data_type == 'conll' else 'necounts'),
                                       coref=(args.coref if args.data_type != 'wiki' else False),
-                                      **dicts)
+                                      dicts=dicts)
         logger.info(f"{data_type} dev dataset created.")
 
     return train_dataset, datasets, word_embs, ent_embs, dicts
@@ -213,7 +213,7 @@ def train(model=None,
                                           args=args,
                                           data_type=data_type,
                                           run=run,
-                                          **dicts)
+                                          dicts=dicts)
 
     trainer = Trainer(loader=train_loader,
                       args=args,

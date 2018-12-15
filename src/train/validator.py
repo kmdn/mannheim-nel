@@ -19,12 +19,12 @@ class Validator:
                  word_dict=None,
                  data_type=None,
                  run=None,
-                 **kwargs):
+                 dicts=None):
 
         self.loader = loader
         self.args = args
-        self.ent_dict = ent_dict
-        self.word_dict = word_dict
+        self.ent_dict = dicts['ent_dict']
+        self.word_dict = dicts['word_dict']
         self.rev_ent_dict = reverse_dict(ent_dict)
         self.rev_word_dict = reverse_dict(word_dict)
         self.data_type = data_type
