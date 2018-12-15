@@ -34,6 +34,7 @@ bin/setup.sh
 
 # Train
 A default config file is provided and can be used to train a new model on CPU like so
+
 ```python train.py --my-config configs/default.yaml --use_cuda False --data_path data```
 
 # Flask server
