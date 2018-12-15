@@ -15,8 +15,6 @@ class Validator:
     def __init__(self,
                  loader=None,
                  args=None,
-                 ent_dict=None,
-                 word_dict=None,
                  data_type=None,
                  run=None,
                  dicts=None):
@@ -25,8 +23,8 @@ class Validator:
         self.args = args
         self.ent_dict = dicts['ent_dict']
         self.word_dict = dicts['word_dict']
-        self.rev_ent_dict = reverse_dict(ent_dict)
-        self.rev_word_dict = reverse_dict(word_dict)
+        self.rev_ent_dict = reverse_dict(self.ent_dict)
+        self.rev_word_dict = reverse_dict(self.word_dict)
         self.data_type = data_type
         self.run = run
 

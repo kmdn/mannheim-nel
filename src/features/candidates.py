@@ -22,8 +22,9 @@ class NelCandidateGenerator:
         nfs.update(get_normalised_forms(cluster_mention_text))
         [cands.extend(self.str_necounts.get(nf, [])) for nf in nfs]
         [cands.extend(self._add_dismb_cands(nf)) for nf in nfs]
+        cands = list(unique_everseen(cands))[:self.max_cands]
 
-        return equalize_len(list(unique_everseen(cands)), self.max_cands, pad='')
+        return cands
 
     def _add_dismb_cands(self, mention):
         res = []

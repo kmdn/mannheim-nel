@@ -1,4 +1,4 @@
-from src.utils.utils import reverse_dict, normalise_form
+from src.utils.utils import reverse_dict, normalise_form, equalize_len
 import numpy as np
 
 
@@ -42,8 +42,10 @@ class PreProcessor(object):
         all_candidate_ids = []
 
         # examples_str = str(doc.doc_id) + '\n'
+        max_cand = max([len(mention.cands) for mention in doc.mentions])
 
         for men_idx, mention in enumerate(doc.mentions):
+            mention.cands = equalize_len(mention.cands, max_cand, pad='')
             all_candidate_strs.append(mention.cands)
             # examples_str += '||'.join([mention.text] + [mention.ent] + mention.cands) + '\n'
             all_candidate_ids.append([self.ent2id.get(cand, 0) for cand in mention.cands])

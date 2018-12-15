@@ -17,7 +17,8 @@ class Dataset(object):
 
     def __init__(self,
                  dicts=None,
-                 data=None,
+                 id2context=None,
+                 examples=None,
                  args=None,
                  cand_type='necounts',
                  data_type=None,
@@ -51,14 +52,11 @@ class Dataset(object):
         self.coref = coref
 
         # Training data and context
-        id2context, examples = data
         self.examples = examples
         self.id2context = id2context
 
         logger.info(f'Generating processed id2context')
-        self.processed_id2context = {}
-        for doc_id in self.id2context.keys():
-            self.processed_id2context[doc_id] = self._init_context(doc_id)
+        self.processed_id2context = {doc_id: self._init_context(doc_id) for doc_id in self.id2context.keys()}
         logger.info("Generated.")
 
     def add_dismb_cands(self, cands, mention):
@@ -104,12 +102,15 @@ class Dataset(object):
         """Initialize numpy array that will hold all context word tokens. Also return mentions"""
 
         context = self.id2context[doc_id]
-        context = context[5:] if self.args.ignore_init else context
-        if isinstance(context, str):
-            context = [self.word_dict.get(token, 0) for token in self.word_tokenizer.tokenize(context)]
-        elif isinstance(context, tuple) and isinstance(context[0], str):
-            context = [self.word_dict.get(token.lower(), 0) for token in context]
-        context = np.array(equalize_len(context, self.args.max_context_size, pad=0))
+        try:
+            if isinstance(context, str):
+                context = [self.word_dict.get(token, 0) for token in self.word_tokenizer.tokenize(context)]
+
+            elif isinstance(context, tuple) and isinstance(context[0], str):
+                context = [self.word_dict.get(token.lower(), 0) for token in context]
+            context = np.array(equalize_len(context, self.args.max_context_size, pad=0))
+        except:
+            print(context)
 
         assert np.any(context), ('CONTEXT IS ALL ZERO', self.id2context[doc_id])
 
@@ -132,8 +133,8 @@ class Dataset(object):
 
             priors[cand_idx] = self.str_prior.get(cand_str, 0)
             nf = normalise_form(mention_str)
-            if nf in self.ent_conditional:
-                conditionals[cand_idx] = self.ent_conditional[nf].get(cand_str, 0)
+            if nf in self.str_cond:
+                conditionals[cand_idx] = self.str_cond[nf].get(cand_str, 0)
             else:
                 conditionals[cand_idx] = 0
 
@@ -186,7 +187,13 @@ class Dataset(object):
             return [self[idx] for idx in range(index.start or 0, index.stop or len(self), index.step or 1)]
 
         if self.coref:
-            doc_id, mention_str, ent_str, cand_gen_strs = self.examples[index]
+            try:
+                doc_id, mention_str, ent_str, cand_gen_strs = self.examples[index]
+            except:
+                example_list = self.examples[index].split('||')
+                doc_id, mention_str, ent_str = example_list[:3]
+                cand_gen_strs = example_list[3:]
+
             ent_str = self.redirects.get(ent_str, ent_str)
             cand_ids, cand_strs, not_in_cand, label = self._get_coref_cands(ent_str, cand_gen_strs)
         else:
