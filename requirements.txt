@@ -1,9 +1,7 @@
 numpy==1.15.0
 Flask==0.12.2
 ConfigArgParse==0.13.0
-gensim==3.6.0
 joblib==0.13.0
 more_itertools==4.3.0
 spacy==2.0.18
-atlas==0.27.0
 torch==1.0.0
