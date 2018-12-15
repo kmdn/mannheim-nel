@@ -119,9 +119,12 @@ def setup(args, logger):
     word_embs = state_dict['word_embs.weight']
     logger.info("Model loaded.")
 
+    logger.info("Loading filestore dicts.....")
     dicts = {}
     for dict_name in ['str_prior', 'str_cond', 'str_necounts', 'redirects', 'disamb' 'ent_dict', 'word_dict']:
         dicts[dict_name] = FileObjectStore(join(args.data_path, "mmaps", dict_name))
+    logger.info("Loaded filestores.")
+
 
     logger.info("Using {} for training.....".format(args.data_type))
     data = defaultdict(dict)
@@ -152,7 +155,6 @@ def setup(args, logger):
 
     logger.info("Creating data loaders and validators.....")
     train_dataset = Dataset(data=train_data,
-                            split='train',
                             data_type=args.data_type,
                             args=args,
                             cand_type=(args.cand_type if args.data_type == 'conll' else 'necounts'),
@@ -163,7 +165,6 @@ def setup(args, logger):
     datasets = {}
     for data_type in args.data_types.split(','):
         datasets[data_type] = Dataset(data=data[data_type]['dev'],
-                                      split='dev',
                                       data_type=args.data_type,
                                       args=args,
                                       cand_type=(args.cand_type if args.data_type == 'conll' else 'necounts'),

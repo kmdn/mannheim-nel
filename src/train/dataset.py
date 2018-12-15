@@ -19,11 +19,9 @@ class Dataset(object):
                  dicts=None,
                  data=None,
                  args=None,
-                 cand_rand=False,
                  cand_type='necounts',
                  data_type=None,
-                 coref=False,
-                 **kwargs):
+                 coref=False):
         super().__init__()
 
         self.args = args
@@ -46,10 +44,7 @@ class Dataset(object):
         # Candidates
         self.num_candidates = self.args.num_candidates
         self.num_cand_gen = int(self.num_candidates * self.args.prop_gen_candidates)
-        self.cand_rand = cand_rand
         self.cand_type = cand_type
-        if self.cand_rand:
-            self.num_candidates = 10 ** 6
 
         # If coref, then there is a special format for which cands have been precomputed.
         # For file name checkout load_data function in utils file.
