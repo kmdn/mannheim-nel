@@ -121,41 +121,46 @@ def setup(args, logger):
 
     logger.info("Loading filestore dicts.....")
     dicts = {}
-    for dict_name in ['str_prior', 'str_cond', 'str_necounts', 'redirects', 'disamb' 'ent_dict', 'word_dict']:
+    for dict_name in ['str_prior', 'str_cond', 'str_necounts', 'redirects', 'disamb', 'ent_dict', 'word_dict']:
         dicts[dict_name] = FileObjectStore(join(args.data_path, "mmaps", dict_name))
     logger.info("Loaded filestores.")
     print(dicts.keys())
 
-
     logger.info("Using {} for training.....".format(args.data_type))
     data = defaultdict(dict)
 
-    for data_type in args.data_types.split(','):
-        if data_type == 'wiki':
-            res = load_data(args.data_type, args.train_size, args.data_path, coref=args.coref)
-            id2context, examples = res['dev']
-            new_examples = [examples[idx] for idx in np.random.randint(0, len(examples), 10000)]
-            res['dev'] = id2context, new_examples
-            for split, data_split in res.items():
-                data['wiki'][split] = data_split
-        elif data_type == 'conll':
-            res = load_data('conll', args, args.data_path, coref=args.coref)
-            for split, data_split in res.items():
-                data['conll'][split] = data_split
-        else:
-            if args.coref:
-                data[data_type]['dev'] = pickle_load(join(args.data_path, f'training_files/coref/{data_type}.pickle'))
-            else:
-                data[data_type]['dev'] = pickle_load(join(args.data_path, f'training_files/{data_type}.pickle'))
+    # for data_type in args.data_types.split(','):
+    #     if data_type == 'wiki':
+    #         res = load_data(args.data_type, args.train_size, args.data_path, coref=args.coref)
+    #         id2context, examples = res['dev']
+    #         new_examples = [examples[idx] for idx in np.random.randint(0, len(examples), 10000)]
+    #         res['dev'] = id2context, new_examples
+    #         for split, data_split in res.items():
+    #             data['wiki'][split] = data_split
+    #     elif data_type == 'conll':
+    #         res = load_data('conll', args, args.data_path, coref=args.coref)
+    #         for split, data_split in res.items():
+    #             data['conll'][split] = data_split
+    #     else:
+    #         if args.coref:
+    #             data[data_type]['dev'] = pickle_load(join(args.data_path, f'training_files/coref/{data_type}.pickle'))
+    #         else:
+    #             data[data_type]['dev'] = pickle_load(join(args.data_path, f'training_files/{data_type}.pickle'))
+    splits = ['train', 'dev', 'test']
+    id2context = FileObjectStore(join(args.data_path, 'training_files/mmaps/id2context'))
+    split_examples = {split: [] for split in splits}
+    for split in splits:
+        split_examples[split] = FileObjectStore(join(args.data_path, f'training_files/mmaps/{split}'))
 
-    if args.data_type == 'conll':
-        train_data = data['conll']['train']
-    else:
-        train_data = data['wiki']['train']
+    # if args.data_type == 'conll':
+    #     train_data = data['conll']['train']
+    # else:
+    #     train_data = data['wiki']['train']
     logger.info("Data loaded.")
 
     logger.info("Creating data loaders and validators.....")
-    train_dataset = Dataset(data=train_data,
+    train_dataset = Dataset(id2context=id2context,
+                            examples=split_examples['train'],
                             data_type=args.data_type,
                             args=args,
                             cand_type=(args.cand_type if args.data_type == 'conll' else 'necounts'),
@@ -165,7 +170,8 @@ def setup(args, logger):
 
     datasets = {}
     for data_type in args.data_types.split(','):
-        datasets[data_type] = Dataset(data=data[data_type]['dev'],
+        datasets[data_type] = Dataset(id2context=id2context,
+                                      examples=split_examples['dev'],
                                       data_type=args.data_type,
                                       args=args,
                                       cand_type=(args.cand_type if args.data_type == 'conll' else 'necounts'),
