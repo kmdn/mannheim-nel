@@ -16,20 +16,20 @@ logger = getLogger(__name__)
 class Dataset(object):
 
     def __init__(self,
-                 ent_prior=None,
-                 ent_conditional=None,
+                 str_prior=None,
+                 str_cond=None,
                  ent_dict=None,
                  word_dict=None,
+                 redirects=None,
+                 necounts=None,
+                 disamb=None,
                  data=None,
                  args=None,
                  cand_rand=False,
                  cand_type='necounts',
                  data_type=None,
-                 split=None,
-                 necounts=None,
-                 redirects=None,
-                 dis_dict=None,
-                 coref=False):
+                 coref=False,
+                 **kwargs):
         super().__init__()
 
         self.args = args
@@ -40,18 +40,18 @@ class Dataset(object):
         self.id2ent = reverse_dict(self.ent2id)
         self.word_dict = word_dict
         self.max_ent = len(self.ent2id)
-        self.ent_prior = ent_prior
-        self.ent_conditional = ent_conditional
-        self.ent_strs = list(self.ent_prior.keys())
+        self.str_prior = str_prior
+        self.str_cond = str_cond
+        self.ent_strs = list(self.str_prior.keys())
         self.data_type = data_type
-        self.split = split
         self.word_tokenizer = RegexpTokenizer()
+
         # If coref, then there is a special format for which cands have been precomputed.
         # For file name checkout load_data function in utils file.
         self.coref = coref
 
         self.redirects = redirects
-        self.dis_dict = dis_dict
+        self.disamb = disamb
 
         self.cand_rand = cand_rand
         self.cand_type = cand_type
@@ -77,10 +77,10 @@ class Dataset(object):
             cands.append(self.redirects[mention_title])
         mention_disamb = mention_title + '_(disambiguation)'
 
-        if mention_title in self.dis_dict:
-            cands.extend(self.dis_dict[mention_title])
-        if mention_disamb in self.dis_dict:
-            cands.extend(self.dis_dict[mention_disamb])
+        if mention_title in self.disamb:
+            cands.extend(self.disamb[mention_title])
+        if mention_disamb in self.disamb:
+            cands.extend(self.disamb[mention_disamb])
 
         return cands
 
@@ -139,7 +139,7 @@ class Dataset(object):
             if cand_str.startswith(mention_str) or cand_str.endswith(mention_str):
                 contains[cand_idx] = 1
 
-            priors[cand_idx] = self.ent_prior.get(cand_str, 0)
+            priors[cand_idx] = self.str_prior.get(cand_str, 0)
             nf = normalise_form(mention_str)
             if nf in self.ent_conditional:
                 conditionals[cand_idx] = self.ent_conditional[nf].get(cand_str, 0)

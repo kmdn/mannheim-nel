@@ -23,10 +23,7 @@ app = Flask(__name__)
 
 def setup(data_path, args):
     app.logger.info('loading models params.....')
-    if args.model.endswith('ckpt'):
-        state_dict = torch.load(join(data_path, f'models/{args.model}'), map_location='cpu')['state_dict']
-    else:
-        state_dict = pickle_load(join(data_path, f'models/{args.model}'))
+    state_dict = torch.load(join(data_path, f'models/{args.model}'), map_location='cpu')['state_dict']
     ent_embs = state_dict['ent_embs.weight']
     word_embs = state_dict['word_embs.weight']
     app.logger.info('yamada models loaded.')

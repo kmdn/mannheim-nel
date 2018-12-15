@@ -8,7 +8,7 @@ from collections import defaultdict
 import numpy as np
 import torch
 
-from src.utils.utils import str2bool, json_load, pickle_load, load_data, send_to_cuda
+from src.utils.utils import str2bool, pickle_load, load_data, send_to_cuda
 from src.train.dataset import Dataset
 from src.train.validator import Validator
 from src.models.mlpmodel import MLPModel
@@ -113,28 +113,15 @@ def parse_args():
 def setup(args, logger):
 
     print()
-    logger.info("Loading Yamada model.....")
-    yamada_model = pickle_load(join(args.data_path, 'yamada', args.yamada_model))  # TODO: fix this
-    ent_dict = yamada_model['ent_dict']
-    word_dict = yamada_model['word_dict']
-    word_embs = yamada_model['word_emb']
-    ent_embs = yamada_model['ent_emb']
-    w = yamada_model['W']
-    b = yamada_model['b']
+    logger.info("Loading pre trained model at models/conll_v0.1.pt.....")
+    state_dict = torch.load(join(args.data_path, 'models/conll_v0.1.pt'), map_location='cpu')['state_dict']
+    ent_embs = state_dict['ent_embs.weight']
+    word_embs = state_dict['word_embs.weight']
     logger.info("Model loaded.")
 
-    if args.mmaps:
-        priors = FileObjectStore(join(args.data_path, "mmaps", 'str_prior'))
-        conditionals = FileObjectStore(join(args.data_path, "mmaps", 'str_cond'))
-        necounts = FileObjectStore(join(args.data_path, "mmaps", "str_necounts"))
-        redirects = FileObjectStore(join(args.data_path, "mmaps", 'redirects'))
-        disamb = FileObjectStore(join(args.data_path, "mmaps", 'disamb'))
-    else:
-        priors = json_load(join(args.data_path, "dicts", 'str_prior.json'))
-        conditionals = json_load(join(args.data_path, "dicts", 'str_cond.json'))
-        necounts = json_load(join(args.data_path, "dicts", "str_necounts.json"))
-        redirects = json_load(join(args.data_path, "dicts", 'redirects.json'))
-        disamb = json_load(join(args.data_path, "dicts", 'disamb.json'))
+    dicts = {}
+    for dict_name in ['str_prior', 'str_cond', 'str_necounts', 'redirects', 'disamb' 'ent_dict', 'word_dict']:
+        dicts[dict_name] = FileObjectStore(join(args.data_path, "mmaps", dict_name))
 
     logger.info("Using {} for training.....".format(args.data_type))
     data = defaultdict(dict)
@@ -164,48 +151,34 @@ def setup(args, logger):
     logger.info("Data loaded.")
 
     logger.info("Creating data loaders and validators.....")
-    train_dataset = Dataset(ent_conditional=conditionals,
-                            ent_prior=priors,
-                            ent_dict=ent_dict,
-                            word_dict=word_dict,
-                            data=train_data,
+    train_dataset = Dataset(data=train_data,
                             split='train',
                             data_type=args.data_type,
                             args=args,
                             cand_type=(args.cand_type if args.data_type == 'conll' else 'necounts'),
-                            necounts=necounts,
-                            redirects=redirects,
-                            dis_dict=disamb,
-                            coref=(args.coref if args.data_type != 'wiki' else False))
+                            coref=(args.coref if args.data_type != 'wiki' else False),
+                            **dicts)
     logger.info("Training dataset created. There will be {len(se")
 
     datasets = {}
     for data_type in args.data_types.split(','):
-        datasets[data_type] = Dataset(ent_conditional=conditionals,
-                                      ent_prior=priors,
-                                      ent_dict=ent_dict,
-                                      word_dict=word_dict,
-                                      data=data[data_type]['dev'],
+        datasets[data_type] = Dataset(data=data[data_type]['dev'],
                                       split='dev',
                                       data_type=args.data_type,
                                       args=args,
                                       cand_type=(args.cand_type if args.data_type == 'conll' else 'necounts'),
-                                      necounts=necounts,
-                                      redirects=redirects,
-                                      dis_dict=disamb,
-                                      coref=(args.coref if args.data_type != 'wiki' else False))
+                                      coref=(args.coref if args.data_type != 'wiki' else False),
+                                      **dicts)
         logger.info(f"{data_type} dev dataset created.")
 
-    return train_dataset, datasets, word_embs, ent_embs, w, b, word_dict, ent_dict
+    return train_dataset, datasets, word_embs, ent_embs, dicts
 
 
-def get_model(args, word_embs, ent_embs, w, b, logger):
+def get_model(args, word_embs, ent_embs,logger):
 
-    model = Model(word_embs=word_embs,
-                  ent_embs=ent_embs,
-                  W=w,
-                  b=b,
-                  args=args)
+    model = MLPModel(word_embs=word_embs,
+                     ent_embs=ent_embs,
+                     args=args)
 
     if args.use_cuda:
         model = send_to_cuda(args.device, model)
@@ -219,8 +192,7 @@ def train(model=None,
           datasets=None,
           train_dataset=None,
           args=None,
-          ent_dict=None,
-          word_dict=None,
+          dicts=None,
           run=None):
 
     train_loader = train_dataset.get_loader(batch_size=args.batch_size,
@@ -237,11 +209,11 @@ def train(model=None,
                                                 num_workers=args.num_workers,
                                                 drop_last=False)
         logger.info(f'Len loader {data_type} : {len(loader)}')
-        validators[data_type] = Validator(loader=loader, args=args,
-                                          word_dict=word_dict,
-                                          ent_dict=ent_dict,
+        validators[data_type] = Validator(loader=loader,
+                                          args=args,
                                           data_type=data_type,
-                                          run=run)
+                                          run=run,
+                                          **dicts)
 
     trainer = Trainer(loader=train_loader,
                       args=args,
@@ -257,9 +229,9 @@ def train(model=None,
 
 if __name__ == '__main__':
     Args, Logger, Model_dir = parse_args()
-    Train_dataset, Datasets, Word_embs, Ent_Embs, W, B, Word_dict, Ent_dict = setup(Args, Logger)
+    Train_dataset, Datasets, Word_embs, Ent_Embs, Dicts = setup(Args, Logger)
 
-    Model = get_model(Args, Word_embs, Ent_Embs, W, B, Logger)
+    Model = get_model(Args, Word_embs, Ent_Embs, Logger)
     if Args.pre_train:
         state_dict = torch.load(Args.pre_train, map_location=Args.device if Args.use_cuda else 'cpu')['state_dict']
         Model.load_state_dict(state_dict)
@@ -268,5 +240,4 @@ if __name__ == '__main__':
           datasets=Datasets,
           logger=Logger,
           args=Args,
-          word_dict=Word_dict,
-          ent_dict=Ent_dict)
+          dicts=Dicts)
