@@ -7,7 +7,7 @@ MEL uses [spacy](https://spacy.io/) for mention detection, Entitiy and Word Embe
 [ntee](https://github.com/studio-ousia/ntee) and and implementation of their MLP for linking, 
 and the candidate generation approach of
 [nel](https://github.com/wikilinks/nel) to provide close to state of the art performance. An easy to
-setup (bare-bones) flask server is also included.
+setup flask server is also included.
 
 # Dependencies:
 * Python 3 with Numpy
@@ -40,6 +40,7 @@ A default config file is provided and can be used to train a new model on CPU li
 # Flask server
 
 Setting up a server is as easy as running
+
 ```python app.py --data_path data --model conll_v0.1.pt```
 
 # Performance
@@ -57,9 +58,9 @@ results for three different values for a fair comparison:
 
 # Contact
 
-Author - [Rohit Gupta](rohitg1594@gmail.com)
+Rohit Gupta - [rohitg1594@gmail.com](rohitg1594@gmail.com)
 
-Advisor - [Samuel Broscheit](samuel.broscheit@googlemail.com )
+Samuel Broscheit - [samuel.broscheit@gmail.com](samuel.broscheit@gmail.com )
 
 # References
 
