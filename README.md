@@ -1,8 +1,11 @@
 # MEL: Mannheim Entity Linking
 MEL is a Python library whose goal is to provide an efficient and easy to use end-to-end Entity Linking system.
 Entity Linking is the task of linking mentions in free text to entities in a Knowledge Base (in our case Wikipedia).
+For example "Washington" can refer to *https://en.wikipedia.org/wiki/George_Washington* or 
+*https://en.wikipedia.org/wiki/Washington,_D.C.* or even *https://en.wikipedia.org/wiki/Federal_government_of_the_United_States.
 MEL uses [spacy](https://spacy.io/) for mention detection, Entitiy and Word Embeddings trained by 
-[ntee](https://github.com/studio-ousia/ntee) for linking, and the candidate generation approach of
+[ntee](https://github.com/studio-ousia/ntee) and and implementation of their MLP for linking, 
+and the candidate generation approach of
 [nel](https://github.com/wikilinks/nel) to provide close to state of the art performance. An easy to
 setup (bare-bones) flask server is also included.
 
