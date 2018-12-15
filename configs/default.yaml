@@ -1,5 +1,4 @@
 # General
-seed:-1
 exp_name:default
 debug:False
 
@@ -25,7 +24,7 @@ cand_type:necounts
 num_candidates:128
 prop_gen_candidates:0.75
 
-# Training Settings
+# Trainer Settings
 patience:10
 num_epochs:50
 batch_size:256
@@ -36,8 +35,8 @@ embs_optim:rmsprop
 other_optim:rmsprop
 sparse:False
 save_every:5
+profile:False
 
 # Cuda
 use_cuda:True
 device:0
-profile:False

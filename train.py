@@ -1,4 +1,4 @@
-# Training file for original yamada model
+# Training file for MLP model
 from datetime import datetime
 import configargparse
 from os.path import join
@@ -25,7 +25,6 @@ def parse_args():
     # General
     general = parser.add_argument_group('General Settings.')
     general.add_argument('--my-config', required=True, is_config_file=True, help='config file path')
-    general.add_argument('--seed', type=int, default=-1, help="Initialization seed")
     general.add_argument('--exp_name', type=str, default="debug", help="Experiment name")
     general.add_argument("--debug", type=str2bool, default=True, help="whether to debug")
 
