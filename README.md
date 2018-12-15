@@ -46,7 +46,7 @@ Setting up a server is as easy as running
 
 We compare against the popular [TagMe](https://tagme.d4science.org/tagme/) system and report F1 scores on the combined
 mention detection and entity linking task. For mention detection, any predicted mentions with over 80% overlap with 
-gold mentions were considered a match. TagMe allows to filter Entity Linking using a confidence parameter, here we show
+a gold mention is considered a match. TagMe allows to filter Entity Linking using a threshold parameter, here we show
 results for three different values for a fair comparison:
 
 | Data Set  |    MEL   | TagMe (Threshold 0.1) | TagMe (Threshold 0.3) | TagMe (Threshold 0.5) |
@@ -58,6 +58,7 @@ results for three different values for a fair comparison:
 # Contact
 
 Author - [Rohit Gupta](rohitg1594@gmail.com)
+
 Advisor - [Samuel Broscheit](samuel.broscheit@googlemail.com )
 
 # References
