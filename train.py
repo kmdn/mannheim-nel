@@ -124,6 +124,7 @@ def setup(args, logger):
     for dict_name in ['str_prior', 'str_cond', 'str_necounts', 'redirects', 'disamb' 'ent_dict', 'word_dict']:
         dicts[dict_name] = FileObjectStore(join(args.data_path, "mmaps", dict_name))
     logger.info("Loaded filestores.")
+    print(dicts.keys())
 
 
     logger.info("Using {} for training.....".format(args.data_type))
