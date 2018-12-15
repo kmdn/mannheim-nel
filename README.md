@@ -2,7 +2,7 @@
 MEL is a Python library whose goal is to provide an efficient and easy to use end-to-end Entity Linking system.
 Entity Linking is the task of linking mentions in free text to entities in a Knowledge Base (in our case Wikipedia).
 MEL uses [spacy](https://spacy.io/) for mention detection, Entitiy and Word Embeddings trained by 
-[ntee](https://github.com/studio-ousia/ntee) for linking, and a candidate generation approach of
+[ntee](https://github.com/studio-ousia/ntee) for linking, and the candidate generation approach of
 [nel](https://github.com/wikilinks/nel) to provide close to state of the art performance. An easy to
 setup (bare-bones) flask server is also included.
 
@@ -17,17 +17,21 @@ setup (bare-bones) flask server is also included.
 
 1. Clone this repo.
 2. We recommend creating a virtual enviroment for this project using conda or pipenv.
-3. Install requirements by running
-```pip install -r requirements.txt```
+3. Install dependencies by running ```pip install -r requirements.txt```.
 4. To use MEL, one needs several dicts that are stored as memory mapped files. These are hosted [here](mmap file link), 
 we also provide a pre-trained model [here](conll model file link) trained on [CONLL](conll data link here).
-All these filess along with setting up of the project's data structure can be done using a shell script
+All these files along with setting up of the project's data structure can be done using a shell script
 ```
 chmod +x bin/setup.sh
 bin/setup.sh
 ```
-Note: this may take a long time depending on your internet connection.
+**Note**: This may take a long time depending on your internet connection. ```setup.sh```
+ will also create training files on conll data by running ```scripts/gen_conll_train.py```.
 
+
+# Train
+A default config file is provided and can be used to train a new model on CPU like so
+```python train.py --my-config configs/default.yaml --use_cuda False --data_path data```
 
 # Flask server
 
@@ -41,13 +45,16 @@ mention detection and entity linking task. For mention detection, any predicted 
 gold mentions were considered a match. TagMe allows to filter Entity Linking using a confidence parameter, here we show
 results for three different values for a fair comparison:
 
-| Data Set  | MEL  | TagMe (Threshold 0.1) | TagMe (Threshold 0.3) | TagMe (Threshold 0.5) |
-|-----------|:----:|:---------------------:|:---------------------:|:---------------------:|
+| Data Set  |    MEL   | TagMe (Threshold 0.1) | TagMe (Threshold 0.3) | TagMe (Threshold 0.5) |
+|-----------|:--------:|:---------------------:|:---------------------:|:---------------------:|
 | Conll-Dev | **0.67** |        0.39           |        0.52           |        0.33           |
 | MSNBC     | **0.64** |        0.28           |        0.46           |        0.23           |
 
 
+# Contact
 
+Author - [Rohit Gupta](rohitg1594@gmail.com)
+Advisor - [Samuel Broscheit](samuel.broscheit@googlemail.com )
 
 # References
 

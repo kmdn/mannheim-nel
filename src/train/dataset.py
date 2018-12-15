@@ -59,45 +59,6 @@ class Dataset(object):
         self.processed_id2context = {doc_id: self._init_context(doc_id) for doc_id in self.id2context.keys()}
         logger.info("Generated.")
 
-    def add_dismb_cands(self, cands, mention):
-        mention_title = mention.title().replace(' ', '_')
-        cands.append(mention_title)
-        if mention_title != self.redirects.get(mention_title, mention_title):
-            cands.append(self.redirects[mention_title])
-        mention_disamb = mention_title + '_(disambiguation)'
-
-        if mention_title in self.disamb:
-            cands.extend(self.disamb[mention_title])
-        if mention_disamb in self.disamb:
-            cands.extend(self.disamb[mention_disamb])
-
-        return cands
-
-    def _gen_cands(self, ent_str, mention):
-        cand_gen_strs = self.add_dismb_cands([], mention)
-        nfs = get_normalised_forms(mention)
-        for nf in nfs:
-            if nf in self.str_necounts:
-                cand_gen_strs.extend(self.str_necounts[nf])
-
-        cand_gen_strs = list(unique_everseen(cand_gen_strs[:self.num_cand_gen]))
-        if ent_str in cand_gen_strs:
-            not_in_cand = False
-            cand_gen_strs.remove(ent_str)
-        else:
-            not_in_cand = True
-
-        len_rand = self.num_candidates - len(cand_gen_strs) - 1
-        if len_rand >= 0:
-            cand_strs = cand_gen_strs + random.sample(self.ent_strs, len_rand)
-        else:
-            cand_strs = cand_gen_strs[:-1]
-        label = random.randint(0, self.args.num_candidates - 1)
-        cand_strs.insert(label, ent_str)
-        cand_ids = np.array([self.ent2id.get(cand_str, 0) for cand_str in cand_strs], dtype=np.int64)
-
-        return cand_ids, cand_strs, not_in_cand, label
-
     def _init_context(self, doc_id):
         """Initialize numpy array that will hold all context word tokens. Also return mentions"""
 
@@ -109,8 +70,8 @@ class Dataset(object):
             elif isinstance(context, tuple) and isinstance(context[0], str):
                 context = [self.word_dict.get(token.lower(), 0) for token in context]
             context = np.array(equalize_len(context, self.args.max_context_size, pad=0))
-        except:
-            print(context)
+        except Exception as e:
+            print(e, context)
 
         assert np.any(context), ('CONTEXT IS ALL ZERO', self.id2context[doc_id])
 
@@ -143,26 +104,7 @@ class Dataset(object):
                 'priors': priors,
                 'conditionals': conditionals}
 
-    def _gen_pershina_cands(self, doc_id, ent_str, mention_str):
-        try:
-            cand_strs = self.docid2candidates[doc_id][mention_str]
-        except KeyError as K:
-            print(K, doc_id)
-            cand_strs = []
-        cand_strs = equalize_len(cand_strs, self.args.num_candidates, pad='')
-        if ent_str == cand_strs[0]:
-            not_in_cand = 0
-        else:
-            not_in_cand = 1
-
-        label = random.randint(0, self.args.num_candidates - 1)
-        cand_strs = cand_strs[1:]
-        cand_strs.insert(label, ent_str)
-        cand_ids = np.array([self.ent2id.get(cand_str, 0) for cand_str in cand_strs], dtype=np.int64)
-
-        return cand_ids, cand_strs, not_in_cand, label
-
-    def _get_coref_cands(self, ent_str, cand_gen_strs):
+    def _get_cands(self, ent_str, cand_gen_strs):
 
         cand_gen_strs = list(unique_everseen(cand_gen_strs[:self.num_cand_gen]))
         if ent_str in cand_gen_strs:
@@ -186,23 +128,16 @@ class Dataset(object):
         if isinstance(index, slice):
             return [self[idx] for idx in range(index.start or 0, index.stop or len(self), index.step or 1)]
 
-        if self.coref:
-            try:
-                doc_id, mention_str, ent_str, cand_gen_strs = self.examples[index]
-            except:
-                example_list = self.examples[index].split('||')
-                doc_id, mention_str, ent_str = example_list[:3]
-                cand_gen_strs = example_list[3:]
+        try:
+            doc_id, mention_str, ent_str, cand_gen_strs = self.examples[index]
+        except Exception as e:
+            print(e)
+            example_list = self.examples[index].split('||')
+            doc_id, mention_str, ent_str = example_list[:3]
+            cand_gen_strs = example_list[3:]
 
-            ent_str = self.redirects.get(ent_str, ent_str)
-            cand_ids, cand_strs, not_in_cand, label = self._get_coref_cands(ent_str, cand_gen_strs)
-        else:
-            doc_id, (mention_str, ent_str, _, _) = self.examples[index]
-            ent_str = self.redirects.get(ent_str, ent_str)
-            if self.cand_type == 'necounts':
-                cand_ids, cand_strs, not_in_cand, label = self._gen_cands(ent_str, mention_str)
-            else:
-                cand_ids, cand_strs, not_in_cand, label = self._gen_pershina_cands(doc_id, ent_str, mention_str)
+        ent_str = self.redirects.get(ent_str, ent_str)
+        cand_ids, cand_strs, not_in_cand, label = self._get_cands(ent_str, cand_gen_strs)
 
         try:
             context = self.processed_id2context[doc_id]
