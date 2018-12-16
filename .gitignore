@@ -43,3 +43,4 @@ __pycache__/
 data/
 experiments.ods
 .ipynb_checkpoints/*
+other/*
