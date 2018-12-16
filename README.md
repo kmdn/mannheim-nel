@@ -2,14 +2,17 @@
 MEL is a Python library whose goal is to provide an efficient and easy to use end-to-end Entity Linking system.
 Entity Linking is the task of linking mentions in free text to entities in a Knowledge Base (in our case Wikipedia).
 For example "Washington" can refer to *https://en.wikipedia.org/wiki/George_Washington* or 
-*https://en.wikipedia.org/wiki/Washington,_D.C.* or even *https://en.wikipedia.org/wiki/Federal_government_of_the_United_States.
-MEL uses [spacy](https://spacy.io/) for mention detection, Entitiy and Word Embeddings trained by 
-[ntee](https://github.com/studio-ousia/ntee) and and implementation of their MLP for linking, 
-and the candidate generation approach of
-[nel](https://github.com/wikilinks/nel) to provide close to state of the art performance. An easy to
+*https://en.wikipedia.org/wiki/Washington,_D.C.* or even *https://en.wikipedia.org/wiki/Federal_government_of_the_United_States*.
+
+MEL is comprised of three main components:
+1. Mention detection using [spacy](https://spacy.io/).
+2. Candidate generation based on [nel](https://github.com/wikilinks/nel).
+3. Entity linking using an implementation of the approach described in [Yamada et al](https://github.com/studio-ousia/ntee).
+
+By leveraging the best methods for each component, MEL is able to achieve close to state-of-the-art performance. An easy to
 setup flask server is also included.
 
-# Dependencies:
+# Dependencies
 * Python 3 with Numpy
 * PyTorch
 * Spacy
@@ -21,9 +24,10 @@ setup flask server is also included.
 1. Clone this repo.
 2. We recommend creating a virtual enviroment for this project using conda or pipenv.
 3. Install dependencies by running ```pip install -r requirements.txt```.
+4. Install spacy model with ```python -m spacy download en```.
 4. To use MEL, one needs several dicts that are stored as memory mapped files. These are hosted [here](mmap file link), 
 we also provide a pre-trained model [here](conll model file link) trained on [CONLL](conll data link here).
-All these files along with setting up of the project's data structure can be done using a shell script
+Downloading these files along with setting up of the project's data structure can be done using a shell script:
 ```
 chmod +x bin/setup.sh
 bin/setup.sh
