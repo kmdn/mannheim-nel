@@ -32,8 +32,19 @@ Downloading these files along with setting up of the project's data structure ca
 chmod +x bin/setup.sh
 bin/setup.sh
 ```
-**Note**: This may take a long time depending on your internet connection. ```setup.sh```
- will also create training files on conll data by running ```scripts/gen_conll_train.py```.
+**Note**: This will download ~4G of data. It will also create training files on conll data by running ```scripts/gen_conll_train.py```.
+
+# Performance
+
+We compare against the popular [TagMe](https://tagme.d4science.org/tagme/) system and report F1 scores on the combined
+mention detection and entity linking task. For mention detection, any predicted mentions with over 80% overlap with 
+a gold mention is considered a match. TagMe allows to filter Entity Linking using a threshold parameter, here we show
+results for three different values for a fair comparison. Here we show overall F1 score / linking accuracy.
+
+| Data Set  |        MEL      | TagMe - Threshold 0.1 | TagMe (Threshold 0.3) | TagMe (Threshold 0.5) |
+|-----------|:---------------:|:---------------------:|:---------------------:|:---------------------:|
+| Conll-Dev | **0.67** / 0.83 |        0.39 / 0.70    |     0.52 / 0.77       |     0.33 / 0.86       |
+| MSNBC     | **0.64** / 0.81 |        0.28 / 0.80    |     0.46 / 0.87       |     0.23 / 0.93       |
 
 
 # Train
@@ -47,17 +58,11 @@ Setting up a server is as easy as running
 
 ```python app.py --data_path data --model conll_v0.1.pt```
 
-# Performance
+# Speed
 
-We compare against the popular [TagMe](https://tagme.d4science.org/tagme/) system and report F1 scores on the combined
-mention detection and entity linking task. For mention detection, any predicted mentions with over 80% overlap with 
-a gold mention is considered a match. TagMe allows to filter Entity Linking using a threshold parameter, here we show
-results for three different values for a fair comparison:
+MEL is efficient as it spends most of its compute time running either spacy's cython code or PyTorch's C code. 
+Here we compare against TagMe using their popular API
 
-| Data Set  |    MEL   | TagMe (Threshold 0.1) | TagMe (Threshold 0.3) | TagMe (Threshold 0.5) |
-|-----------|:--------:|:---------------------:|:---------------------:|:---------------------:|
-| Conll-Dev | **0.67** |        0.39           |        0.52           |        0.33           |
-| MSNBC     | **0.64** |        0.28           |        0.46           |        0.23           |
 
 
 # Contact
