@@ -43,8 +43,8 @@ results for three different values for a fair comparison. Here we show overall F
 
 | Data Set  |        MEL      | TagMe - Threshold 0.1 | TagMe (Threshold 0.3) | TagMe (Threshold 0.5) |
 |-----------|:---------------:|:---------------------:|:---------------------:|:---------------------:|
-| Conll-Dev | **0.67** / 0.83 |        0.39 / 0.70    |     0.52 / 0.77       |     0.33 / 0.86       |
-| MSNBC     | **0.64** / 0.81 |        0.28 / 0.80    |     0.46 / 0.87       |     0.23 / 0.93       |
+| Conll-Dev | **0.68** / 0.85 |        0.39 / 0.70    |     0.52 / 0.77       |     0.33 / 0.86       |
+| MSNBC     | **0.65** / 0.82 |        0.28 / 0.80    |     0.46 / 0.87       |     0.23 / 0.90       |
 
 
 # Train
@@ -61,7 +61,15 @@ Setting up a server is as easy as running
 # Speed
 
 MEL is efficient as it spends most of its compute time running either spacy's cython code or PyTorch's C code. 
-Here we compare against TagMe using their popular API
+Here we compare MEL's server against TagMe using their [API](https://services.d4science.org/web/tagme/).
+
+| API   | words / second |
+|:-----:|:--------------:|
+| MEL   |   10,997       |
+| TagMe |   1,095        |
+
+**Note**: our server was setup to run on a LAN and TagMe API likely has much higher network latency, still we are 
+about ten times faster! 
 
 
 
