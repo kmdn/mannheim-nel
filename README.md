@@ -58,6 +58,8 @@ Setting up a server is as easy as running
 
 ```python app.py --data_path data --model conll_v0.1.pt```
 
+An example notebook on how to use the API is [here](notebooks/API%20example.ipynb).
+
 # Speed
 
 MEL is efficient as it spends most of its compute time running either spacy's cython code or PyTorch's C code. 
