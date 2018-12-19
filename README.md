@@ -49,7 +49,7 @@ results for three different values for a fair comparison. Here we show overall F
 
 # Train
 If you want to train a new model, then you need to generate trainig, dev and test data in the format used by MEL.
-To accomplish this, we provide a script: [gen_trian_data.py](scripts/gen_train_data.py). The input to this file is data 
+To accomplish this, we provide a script: [gen_train_data.py](scripts/gen_train_data.py). The input to this file is data 
 in [AIDA Conll-YAGO dataset](https://www.mpi-inf.mpg.de/departments/databases-and-information-systems/research/yago-naga/aida/downloads/)
 format which we can't distribute due to licensing issues. Each document must start like so:
 
@@ -61,7 +61,9 @@ should include 'testb'. Each line thereafter, should have four feilds separated 
 title of entity it refers to and wikipedia page URL. For example:
 
 German    B    German    German    http://en.wikipedia.org/wiki/Germany
+
 European    B    European Commision    European_Commission     http://en.wikipedia.org/wiki/European_Commission
+
 Commision    I    European Commision    European_Commission     http://en.wikipedia.org/wiki/European_Commission
 
 Each document should be demarcated by a blank line. A default config file is provided and can be used to 
