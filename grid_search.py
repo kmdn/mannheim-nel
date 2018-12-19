@@ -2,6 +2,7 @@
 import pickle
 from os.path import join
 import gc
+import time
 
 import numpy as np
 from sklearn.model_selection import ParameterGrid
@@ -36,6 +37,7 @@ def grid_search(word_embs=None,
     grid_results_dict = {}
     pd_results = list()
     dicts = load_file_stores(args.data_path)
+    data_types = args.data_types.split(',')
 
     for param_dict in list(ParameterSampler(param_grid, 50)):
         for k, v in param_dict.items():
@@ -55,7 +57,6 @@ def grid_search(word_embs=None,
 
         logger.info("GRID SEARCH PARAMS : {}".format(param_dict))
         result_key = tuple(param_dict.items())
-        data_types = args.data_types.split(',')
         grid_results_dict[result_key] = {data_type: [] for data_type in data_types}
 
         logger.info("Starting validation for untrained model.....")
@@ -95,9 +96,10 @@ def grid_search(word_embs=None,
         with open(join(model_dir, 'grid_search_results.pickle'), 'wb') as f:
             pickle.dump(grid_results_dict, f)
 
-        del model, trainer, train_loader, loader, validators
+        del model, trainer, train_loader, loader, validators, best_model, best_results
         torch.cuda.empty_cache()
         gc.collect()
+        time.sleep(10)
 
     return grid_results_dict, pd_results
 

@@ -127,8 +127,6 @@ def setup(args, logger):
     for split in splits:
         split_examples[split] = FileObjectStore(join(args.data_path, f'training_files/{args.data_type}/{split}'))
 
-    #sys.exit(1)
-
     logger.info("Data loaded.")
 
     logger.info("Creating data loaders and validators.....")
