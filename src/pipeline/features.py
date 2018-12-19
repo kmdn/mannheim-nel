@@ -2,7 +2,7 @@ from src.utils.utils import reverse_dict, normalise_form, equalize_len
 import numpy as np
 
 
-class PreProcessor(object):
+class FeatureGenerator(object):
 
     def __init__(self, **kwargs):
 

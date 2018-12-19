@@ -6,10 +6,10 @@ from os.path import join
 import torch
 import logging
 
-from src.features.preprocessor import PreProcessor
-from src.features.detector import SpacyDetector
-from src.features.coref import HeuresticCorefResolver
-from src.features.candidates import NelCandidateGenerator
+from src.pipeline.features import FeatureGenerator
+from src.pipeline.detector import SpacyDetector
+from src.pipeline.coref import HeuresticCorefResolver
+from src.pipeline.candidates import NelCandidateGenerator
 from src.models.mlpmodel import MLPModel
 from src.utils.file import FileObjectStore
 from src.repr.doc import Doc
@@ -34,7 +34,7 @@ def setup(data_path, args):
         file_stores[dict_name] = FileObjectStore(join(data_path, f'mmaps/{dict_name}'))
 
     app.logger.info('creating preprocessor, respolver, detector and candidate generator.....')
-    processor = PreProcessor(**file_stores)
+    processor = FeatureGenerator(**file_stores)
     coref_resolver = HeuresticCorefResolver()
     detector = SpacyDetector()
     candidate_generator = NelCandidateGenerator(max_cands=100,

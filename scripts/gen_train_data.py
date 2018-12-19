@@ -4,9 +4,9 @@ import sys
 import os
 sys.path.extend('..')
 from src.utils.utils import *
-from src.features.detector import SpacyDetector
-from src.features.coref import HeuresticCorefResolver
-from src.features.candidates import NelCandidateGenerator
+from src.pipeline.detector import SpacyDetector
+from src.pipeline.coref import HeuresticCorefResolver
+from src.pipeline.candidates import NelCandidateGenerator
 from src.utils.file import FileObjectStore
 from src.repr.doc import Doc
 from src.utils.iter_docs import iter_docs
