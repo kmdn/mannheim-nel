@@ -154,7 +154,10 @@ class Dataset(object):
                   **features_dict}
 
         for k, v in output.items():
-            print(k, v.shape)
+            try:
+                print(k, v.shape)
+            except:
+                print(k, v)
 
         return output
 
