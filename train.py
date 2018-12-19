@@ -3,12 +3,12 @@ from datetime import datetime
 import configargparse
 from os.path import join
 import os
-from collections import defaultdict
+import sys
 
 import numpy as np
 import torch
 
-from src.utils.utils import str2bool, pickle_load, load_data, send_to_cuda
+from src.utils.utils import str2bool, send_to_cuda
 from src.train.dataset import Dataset
 from src.train.validator import Validator
 from src.models.mlpmodel import MLPModel
@@ -31,10 +31,9 @@ def parse_args():
     # Data
     data = parser.add_argument_group('Data Settings.')
     data.add_argument('--data_path', required=True, type=str, help='location of data dir')
-    data.add_argument('--yamada_model', type=str, help='name of yamada model')
-    data.add_argument('--data_type', type=str, choices=['conll', 'wiki', 'proto'], help='whether to train with conll or wiki')
+    data.add_argument('--data_type', type=str, help='name of train dataset, a directory of this name should contain '
+                                                    'generated training data using gen_train_data.py')
     data.add_argument('--train_size', type=int, help='number of training abstracts')
-    data.add_argument('--mmaps', type=str2bool, help='use dicts or mmaps')
     data.add_argument('--data_types', type=str, help='name of datasets separated by comma')
 
     # Max Padding
@@ -127,10 +126,12 @@ def setup(args, logger):
 
     logger.info("Using {} for training.....".format(args.data_type))
     splits = ['train', 'dev', 'test']
-    id2context = FileObjectStore(join(args.data_path, 'training_files/mmaps/id2context'))
+    id2context = FileObjectStore(join(args.data_path, f'training_files/{args.data_type}/id2context'))
     split_examples = {split: [] for split in splits}
     for split in splits:
-        split_examples[split] = FileObjectStore(join(args.data_path, f'training_files/mmaps/{split}'))
+        split_examples[split] = FileObjectStore(join(args.data_path, f'training_files/{args.data_type}/{split}'))
+
+    #sys.exit(1)
 
     logger.info("Data loaded.")
 

@@ -128,13 +128,9 @@ class Dataset(object):
         if isinstance(index, slice):
             return [self[idx] for idx in range(index.start or 0, index.stop or len(self), index.step or 1)]
 
-        try:
-            doc_id, mention_str, ent_str, cand_gen_strs = self.examples[index]
-        except Exception as e:
-            print(e)
-            example_list = self.examples[index].split('||')
-            doc_id, mention_str, ent_str = example_list[:3]
-            cand_gen_strs = example_list[3:]
+        example_list = self.examples[index].split('||')
+        doc_id, mention_str, ent_str = example_list[:3]
+        cand_gen_strs = example_list[3:]
 
         ent_str = self.redirects.get(ent_str, ent_str)
         cand_ids, cand_strs, not_in_cand, label = self._get_cands(ent_str, cand_gen_strs)
