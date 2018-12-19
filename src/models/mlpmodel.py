@@ -35,7 +35,7 @@ class MLPModel(Loss, nn.Module):
         self.orig_linear = nn.Linear(word_embs.shape[1], ent_embs.shape[1])
 
         # MLP Layers
-        self.hidden = nn.Linear(5 + 2 * self.emb_dim, self.args.hidden_size)
+        self.hidden = nn.Linear(6 + 2 * self.emb_dim, self.args.hidden_size)
         self.output = nn.Linear(self.args.hidden_size, 1)
 
         # Dropout
@@ -71,6 +71,7 @@ class MLPModel(Loss, nn.Module):
         conditionals = input_dict['conditionals'].unsqueeze(dim=2)
         exact_match = input_dict['exact_match'].unsqueeze(dim=2)
         contains = input_dict['contains'].unsqueeze(dim=2)
+        cand_cond_feature = input_dict['cand_cond_feature'].unsqueeze(dim=2)
 
         # Create input for mlp
         input = self.dp(torch.cat((context_embs,
@@ -79,7 +80,8 @@ class MLPModel(Loss, nn.Module):
                                    priors,
                                    conditionals,
                                    exact_match,
-                                   contains), dim=2))
+                                   contains,
+                                   cand_cond_feature), dim=2))
 
         # Scores
         scores = self.output(F.relu(self.dp(self.hidden(input))))

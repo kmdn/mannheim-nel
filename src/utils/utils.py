@@ -15,6 +15,8 @@ import numpy as np
 import torch
 from torch.nn import DataParallel
 
+from src.utils.file import FileObjectStore
+
 # Leave this here to prevent circular imports!
 def np_to_tensor(a):
     if isinstance(a, np.ndarray):
@@ -159,6 +161,15 @@ def str2bool(v):
         return True
     elif v.lower() in ('no', 'false', 'f', 'n', '0'):
         return False
+
+
+def load_file_stores(data_path):
+    dict_names = ['ent_dict', 'word_dict', 'redirects', 'str_prior', 'str_cond', 'disamb', 'str_necounts']
+    file_stores = {}
+    for dict_name in dict_names:
+        file_stores[dict_name] = FileObjectStore(join(data_path, f'mmaps/{dict_name}'))
+
+    return file_stores
 
 
 def send_to_cuda(device, model):

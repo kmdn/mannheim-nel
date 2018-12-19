@@ -130,7 +130,10 @@ class Dataset(object):
 
         example_list = self.examples[index].split('||')
         doc_id, mention_str, ent_str = example_list[:3]
-        cand_gen_strs = example_list[3:]
+
+        cand_feature_list = example_list[3:]
+        cand_gen_strs, cand_cond_feature = zip(*[cand_feature.split('@@') for cand_feature in cand_feature_list])
+        cand_cond_feature = np.array([float(feature) for feature in equalize_len(list(cand_cond_feature), self.args.num_candidates)])
 
         ent_str = self.redirects.get(ent_str, ent_str)
         cand_ids, cand_strs, not_in_cand, label = self._get_cands(ent_str, cand_gen_strs)
@@ -147,6 +150,7 @@ class Dataset(object):
                   'cand_strs': cand_strs,
                   'ent_strs': ent_str,
                   'label': label,
+                  'cand_cond_feature': np.array(cand_cond_feature, dtype=np.float32),
                   **features_dict}
 
         return output
