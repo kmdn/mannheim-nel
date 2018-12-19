@@ -153,12 +153,6 @@ class Dataset(object):
                   'cand_cond_feature': np.array(cand_cond_feature, dtype=np.float32),
                   **features_dict}
 
-        for k, v in output.items():
-            try:
-                print(k, v.shape)
-            except:
-                print(k, v)
-
         return output
 
     def __len__(self):
