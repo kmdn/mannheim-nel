@@ -60,11 +60,9 @@ should include 'testb'. Each line thereafter, should have four feilds separated 
 [BIO tag](https://en.wikipedia.org/wiki/Inside%E2%80%93outside%E2%80%93beginning_(tagging)), full name of mention, 
 title of entity it refers to and wikipedia page URL. For example:
 
-German    B    German    German    http://en.wikipedia.org/wiki/Germany
-
-European    B    European Commision    European_Commission     http://en.wikipedia.org/wiki/European_Commission
-
-Commision    I    European Commision    European_Commission     http://en.wikipedia.org/wiki/European_Commission
+1.German    B    German    German    http://en.wikipedia.org/wiki/Germany
+2. European    B    European Commision    European_Commission     http://en.wikipedia.org/wiki/European_Commission
+3. Commision    I    European Commision    European_Commission     http://en.wikipedia.org/wiki/European_Commission
 
 Each document should be demarcated by a blank line. A default config file is provided and can be used to 
 train a new model on CPU like so
