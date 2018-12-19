@@ -8,7 +8,7 @@ import sys
 import numpy as np
 import torch
 
-from src.utils.utils import str2bool, send_to_cuda
+from src.utils.utils import str2bool, send_to_cuda, load_file_stores
 from src.train.dataset import Dataset
 from src.train.validator import Validator
 from src.models.mlpmodel import MLPModel
@@ -119,10 +119,7 @@ def setup(args, logger):
     logger.info("Model loaded.")
 
     logger.info("Loading filestore dicts.....")
-    dicts = {}
-    for dict_name in ['str_prior', 'str_cond', 'str_necounts', 'redirects', 'disamb', 'ent_dict', 'word_dict']:
-        dicts[dict_name] = FileObjectStore(join(args.data_path, "mmaps", dict_name))
-    logger.info("Loaded filestores.")
+    dicts = load_file_stores(args.data_path)
 
     logger.info("Using {} for training.....".format(args.data_type))
     splits = ['train', 'dev', 'test']
@@ -158,7 +155,7 @@ def setup(args, logger):
     return train_dataset, datasets, word_embs, ent_embs, dicts
 
 
-def get_model(args, word_embs, ent_embs,logger):
+def get_model(args, word_embs, ent_embs, logger):
 
     model = MLPModel(word_embs=word_embs,
                      ent_embs=ent_embs,

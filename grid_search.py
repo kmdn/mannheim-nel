@@ -2,7 +2,6 @@
 import pickle
 from os.path import join
 import gc
-from collections import defaultdict
 
 import numpy as np
 from sklearn.model_selection import ParameterGrid
@@ -12,6 +11,7 @@ import pandas as pd
 import torch
 
 from train import parse_args, setup, get_model
+from src.utils.utils import load_file_stores
 from src.train.trainer import Trainer
 from src.train.validator import Validator
 DATA_TYPES = [ 'conll', 'wiki', 'ace2004', 'msnbc']
@@ -19,7 +19,8 @@ DATA_TYPES = [ 'conll', 'wiki', 'ace2004', 'msnbc']
 np.warnings.filterwarnings('ignore')
 
 
-def grid_search(yamada_model=None,
+def grid_search(word_embs=None,
+                ent_embs=None,
                 logger=None,
                 datasets=None,
                 model_dir=None,
@@ -35,6 +36,7 @@ def grid_search(yamada_model=None,
                   }
     grid_results_dict = {}
     pd_results = list()
+    dicts = load_file_stores(args.data_path)
 
     for param_dict in list(ParameterSampler(param_grid, 50)):
         for k, v in param_dict.items():
@@ -45,7 +47,7 @@ def grid_search(yamada_model=None,
             dataset.num_cand_gen = int(param_dict['num_candidates'] * param_dict['prop_gen_candidates'])
             dataset.num_candidates = param_dict['num_candidates']
 
-        model = get_model(args, yamada_model, logger)
+        model = get_model(args, word_embs, ent_embs, logger)
         train_loader = train_dataset.get_loader(batch_size=args.batch_size,
                                                 shuffle=False,
                                                 num_workers=args.num_workers,
@@ -64,9 +66,9 @@ def grid_search(yamada_model=None,
                                                     num_workers=args.num_workers,
                                                     drop_last=False)
             logger.info(f'Len loader {data_type} : {len(loader)}')
-            validators[data_type] = YamadaValidator(loader=loader, args=args,
-                                                    word_dict=yamada_model['word_dict'],
-                                                    ent_dict=yamada_model['ent_dict'])
+            validators[data_type] = Validator(loader=loader,
+                                              args=args,
+                                              dicts=dicts)
 
         trainer = Trainer(loader=train_loader,
                           args=args,
@@ -102,8 +104,9 @@ def grid_search(yamada_model=None,
 
 if __name__ == '__main__':
     Args, Logger, Model_dir = parse_args()
-    Train_dataset, Datasets, Yamada_model = setup(Args, Logger)
-    result_dict, pd_dict = grid_search(yamada_model=Yamada_model,
+    Train_dataset, Datasets, Word_embs, Ent_embs, Dicts = setup(Args, Logger)
+    result_dict, pd_dict = grid_search(word_embs=Word_embs,
+                                       ent_embs=Ent_embs,
                                        model_dir=Model_dir,
                                        train_dataset=Train_dataset,
                                        datasets=Datasets,
