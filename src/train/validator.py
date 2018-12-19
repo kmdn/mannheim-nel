@@ -28,6 +28,8 @@ class Validator:
         self.data_type = data_type
         self.run = run
 
+        print(f'Validator has batch size: {self.loader.batch_size}')
+
     def _get_next_batch(self, data_dict):
         skip_keys = ['ent_strs', 'cand_strs', 'not_in_cand']
         for k, v in data_dict.items():
