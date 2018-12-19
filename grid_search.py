@@ -14,7 +14,6 @@ from train import parse_args, setup, get_model
 from src.utils.utils import load_file_stores
 from src.train.trainer import Trainer
 from src.train.validator import Validator
-DATA_TYPES = [ 'conll', 'wiki', 'ace2004', 'msnbc']
 
 np.warnings.filterwarnings('ignore')
 
@@ -56,11 +55,12 @@ def grid_search(word_embs=None,
 
         logger.info("GRID SEARCH PARAMS : {}".format(param_dict))
         result_key = tuple(param_dict.items())
-        grid_results_dict[result_key] = {data_type: [] for data_type in DATA_TYPES}
+        data_types = args.data_types.split(',')
+        grid_results_dict[result_key] = {data_type: [] for data_type in data_types}
 
         logger.info("Starting validation for untrained model.....")
         validators = {}
-        for data_type in DATA_TYPES:
+        for data_type in data_types:
             loader = datasets[data_type].get_loader(batch_size=args.batch_size,
                                                     shuffle=False,
                                                     num_workers=args.num_workers,
@@ -80,7 +80,7 @@ def grid_search(word_embs=None,
 
         logger.info("Starting Training.....")
         print()
-        best_results = trainer.train()
+        best_model, best_results = trainer.train()
         logger.info("Finished Training")
 
         pd_results.append({**param_dict, **best_results})

@@ -165,4 +165,4 @@ class Trainer(object):
             'state_dict': best_model.state_dict(),
             **self.optimizer.get_state_dict()}, filename=join(self.model_dir, 'best_model.pt'))
 
-        return best_results
+        return best_model, best_results

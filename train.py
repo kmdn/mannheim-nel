@@ -41,7 +41,6 @@ def parse_args():
     padding.add_argument('--max_context_size', type=int, help='max number of context')
     padding.add_argument('--max_ent_size', type=int, help='max number of entities considered in abstract')
     padding.add_argument('--num_docs', type=int, help='max number of docs to use to create corpus vec')
-    padding.add_argument('--ignore_init', type=str2bool, help='whether to ignore first five tokens of context')
 
     # Model Type
     model_selection = parser.add_argument_group('Type of model to train.')
@@ -204,8 +203,13 @@ def train(model=None,
                       profile=args.profile)
     logger.info("Starting Training:")
     print()
-    trainer.train()
+    best_model, best_results = trainer.train()
     logger.info("Finished Training")
+
+    logger.info("Validating with best model....")
+    best_model.eval()
+    for data_type in args.data_types.split(','):
+        validators[data_type].validate(best_model)
 
 
 if __name__ == '__main__':
