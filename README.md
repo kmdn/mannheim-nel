@@ -32,7 +32,7 @@ Downloading these files along with setting up of the project's data structure ca
 chmod +x bin/setup.sh
 bin/setup.sh
 ```
-**Note**: This will download ~4G of data. It will also create training files on conll data by running ```scripts/gen_conll_train.py```.
+**Note**: This will download ~4G of data.
 
 # Performance
 
@@ -48,9 +48,24 @@ results for three different values for a fair comparison. Here we show overall F
 
 
 # Train
+If you want to train a new model, then you need to generate trainig, dev and test data in the format used by MEL.
+To accomplish this, we provide a script: [gen_trian_data.py](scripts/gen_train_data.py). The input to this file is data 
+in [AIDA Conll-YAGO dataset](https://www.mpi-inf.mpg.de/departments/databases-and-information-systems/research/yago-naga/aida/downloads/)
+format which we can't distribute due to licensing issues. Each document must start like so:
+-DOCSTART- ([DOC ID])
+The doc id can be anything you choose, but for dev documents it should include 'testa' and for test documents it 
+should include 'testb'. Each line thereafter, should have four feilds separated by tabs: Token,
+[BIO tag](https://en.wikipedia.org/wiki/Inside%E2%80%93outside%E2%80%93beginning_(tagging)), full name of mention, 
+title of Entity it refers to and wikipedia page URL. For example:
+German    B    German    German    http://en.wikipedia.org/wiki/Germany
+European    B    European Commision    European_Commission     http://en.wikipedia.org/wiki/European_Commission
+Commision    I    European Commision    European_Commission     http://en.wikipedia.org/wiki/European_Commission
+
+Each document should be demarcated by a black line.
 A default config file is provided and can be used to train a new model on CPU like so
 
-```python train.py --my-config configs/default.yaml --use_cuda False --data_path data```
+```python train.py --my-config configs/default.yaml --use_cuda False --data_path data```.
+
 
 # Flask server
 
