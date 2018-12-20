@@ -4,12 +4,12 @@ import numpy as np
 
 class FeatureGenerator(object):
 
-    def __init__(self, **kwargs):
+    def __init__(self, file_stores=None):
 
-        self.ent2id = kwargs['ent_dict']
+        self.ent2id = file_stores['ent_dict']
         self.id2ent = reverse_dict(self.ent2id)
-        self.str_prior = kwargs['str_prior']
-        self.str_cond = kwargs['str_cond']
+        self.str_prior = file_stores['str_prior']
+        self.str_cond = file_stores['str_cond']
 
     @staticmethod
     def get_string_feats(mention_str, candidate_strs):
@@ -34,6 +34,7 @@ class FeatureGenerator(object):
 
     def process(self, doc):
         context_tokens = doc.get_context_tokens()
+        # print(context_tokens)
         doc.gen_cands()
 
         all_exact_match = []
@@ -73,8 +74,5 @@ class FeatureGenerator(object):
                'exact_match': np.array(all_exact_match, dtype=np.float32),
                'contains': np.array(all_contains, dtype=np.float32),
                'cand_cond_feature': np.array(cand_cond_feature, dtype=np.float32)}
-
-        # print(ret['candidate_strs'][:, :10])
-        # print(ret['cand_cond_feature'][:, :10])
 
         return ret

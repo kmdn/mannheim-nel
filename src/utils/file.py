@@ -2,10 +2,11 @@ import os
 import mmap
 import pickle
 import operator
-from flask import Flask
 from functools import lru_cache
 
-app = Flask(__name__)
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 class FileObjectStore(object):
@@ -80,14 +81,14 @@ class mmdict(object):
 
         index_path = self.path + '.index'
         if os.path.exists(index_path):
-            app.logger.info('Loading mmap store: %s ...' % index_path)
+            logger.info('Loading mmap store: %s ...' % index_path)
             with open(index_path, 'rb') as f:
                 self.index = dict(self.deserialise(f))
 
             self.data_file = open(path + '.data', 'rb')
             self.data_mmap = mmap.mmap(self.data_file.fileno(), 0, prot=mmap.PROT_READ)
         else:
-            app.logger.warn('No existing mmap store found: %s ...' % index_path)
+            logger.warn('No existing mmap store found: %s ...' % index_path)
 
     @staticmethod
     def serialise(obj, f):

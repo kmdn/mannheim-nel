@@ -81,6 +81,7 @@ def linking():
     input_dict.pop('candidate_strs')
 
     scores, _, _ = Model(input_dict)
+    # print(scores[:10, :10])
 
     pred_mask = torch.argmax(scores, len(scores.shape) - 1)
     entities = candidate_strs[np.arange(len(candidate_strs)), pred_mask.numpy()].tolist()

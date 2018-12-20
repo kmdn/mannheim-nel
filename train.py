@@ -118,7 +118,7 @@ def setup(args, logger):
     logger.info("Model loaded.")
 
     logger.info("Loading filestore dicts.....")
-    dicts = load_file_stores(args.data_path)
+    file_stores = load_file_stores(args.data_path)
 
     logger.info("Using {} for training.....".format(args.data_type))
     splits = ['train', 'dev', 'test']
@@ -134,9 +134,7 @@ def setup(args, logger):
                             examples=split_examples['train'],
                             data_type=args.data_type,
                             args=args,
-                            cand_type=(args.cand_type if args.data_type == 'conll' else 'necounts'),
-                            coref=(args.coref if args.data_type != 'wiki' else False),
-                            dicts=dicts)
+                            file_stores=file_stores)
 
     datasets = {}
     for data_type in args.data_types.split(','):
@@ -144,12 +142,10 @@ def setup(args, logger):
                                       examples=split_examples['dev'],
                                       data_type=args.data_type,
                                       args=args,
-                                      cand_type=(args.cand_type if args.data_type == 'conll' else 'necounts'),
-                                      coref=(args.coref if args.data_type != 'wiki' else False),
-                                      dicts=dicts)
+                                      file_stores=file_stores)
         logger.info(f"{data_type} dev dataset created.")
 
-    return train_dataset, datasets, word_embs, ent_embs, dicts
+    return train_dataset, datasets, word_embs, ent_embs, file_stores
 
 
 def get_model(args, word_embs, ent_embs, logger):

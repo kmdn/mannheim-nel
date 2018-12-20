@@ -7,13 +7,11 @@ class NelCandidateGenerator:
 
     def __init__(self,
                  max_cands=100,
-                 disamb=None,
-                 str_necounts=None,
-                 redirects=None):
+                 file_stores=None):
         self.max_cands = max_cands
-        self.disamb = disamb
-        self.str_necounts = str_necounts
-        self.rd = redirects
+        self.disamb = file_stores['disamb']
+        self.str_necounts = file_stores['str_necounts']
+        self.rd = file_stores['redirects']
 
     def gen_cands(self, mention_text, cluster_mention_text):
         cands = []

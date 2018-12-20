@@ -99,7 +99,7 @@ def grid_search(word_embs=None,
         del model, trainer, train_loader, loader, validators, best_model, best_results
         torch.cuda.empty_cache()
         gc.collect()
-        time.sleep(10)
+        time.sleep(3)
 
     return grid_results_dict, pd_results
 

@@ -1,11 +1,11 @@
-# This module implements dataloader for the yamada model
+# This module implements dataloader for the MLP model
 
 import torch.utils.data
 import numpy as np
 from more_itertools import unique_everseen
 
 from src.utils.tokenizer import RegexpTokenizer
-from src.utils.utils import reverse_dict, equalize_len, normalise_form
+from src.utils.utils import reverse_dict, equalize_len
 from src.pipeline.features import FeatureGenerator
 import random
 
@@ -17,13 +17,11 @@ logger = getLogger(__name__)
 class Dataset(object):
 
     def __init__(self,
-                 dicts=None,
+                 file_stores=None,
                  id2context=None,
                  examples=None,
                  args=None,
-                 cand_type='necounts',
-                 data_type=None,
-                 coref=False):
+                 data_type=None):
         super().__init__()
 
         self.args = args
@@ -31,29 +29,21 @@ class Dataset(object):
         self.word_tokenizer = RegexpTokenizer()
 
         # Dicts
-        self.ent2id = dicts['ent_dict']
+        self.ent2id = file_stores['ent_dict']
         self.len_ent = len(self.ent2id)
         self.id2ent = reverse_dict(self.ent2id)
-        self.word_dict = dicts['word_dict']
+        self.word_dict = file_stores['word_dict']
         self.max_ent = len(self.ent2id)
-        self.str_prior = dicts['str_prior']
-        self.str_cond = dicts['str_cond']
-        self.redirects = dicts['redirects']
-        self.disamb = dicts['disamb']
-        self.str_necounts = dicts['str_necounts']
+        self.str_prior = file_stores['str_prior']
+        self.redirects = file_stores['redirects']
         self.ent_strs = list(self.str_prior.keys())
 
         # Features
-        self.feature_generator = FeatureGenerator(**dicts)
+        self.feature_generator = FeatureGenerator(**file_stores)
 
         # Candidates
         self.num_candidates = self.args.num_candidates
         self.num_cand_gen = int(self.num_candidates * self.args.prop_gen_candidates)
-        self.cand_type = cand_type
-
-        # If coref, then there is a special format for which cands have been precomputed.
-        # For file name checkout load_data function in utils file.
-        self.coref = coref
 
         # Training data and context
         self.examples = examples
@@ -64,7 +54,7 @@ class Dataset(object):
         logger.info("Generated.")
 
     def _init_context(self, doc_id):
-        """Initialize numpy array that will hold all context word tokens. Also return mentions"""
+        """Initialize numpy array that will hold all context word tokens."""
 
         context = self.id2context[doc_id]
         try:
@@ -81,39 +71,15 @@ class Dataset(object):
 
         return context
 
-    def _gen_features(self, mention_str, cand_strs):
+    def _get_cands(self, ent_str, cand_gen_strs, cand_cond_feature):
 
-        # Initialize
-        exact = np.zeros(self.num_candidates).astype(np.float32)
-        contains = np.zeros(self.num_candidates).astype(np.float32)
-        priors = np.zeros(self.num_candidates).astype(np.float32)
-        conditionals = np.zeros(self.num_candidates).astype(np.float32)
-
-        # Populate
-        for cand_idx, cand_str in enumerate(cand_strs):
-            if mention_str == cand_str or mention_str in cand_str:
-                exact[cand_idx] = 1
-            if cand_str.startswith(mention_str) or cand_str.endswith(mention_str):
-                contains[cand_idx] = 1
-
-            priors[cand_idx] = self.str_prior.get(cand_str, 0)
-            nf = normalise_form(mention_str)
-            if nf in self.str_cond:
-                conditionals[cand_idx] = self.str_cond[nf].get(cand_str, 0)
-            else:
-                conditionals[cand_idx] = 0
-
-        return {'exact_match': exact,
-                'contains': contains,
-                'priors': priors,
-                'conditionals': conditionals}
-
-    def _get_cands(self, ent_str, cand_gen_strs):
-
-        cand_gen_strs = list(unique_everseen(cand_gen_strs[:self.num_cand_gen]))
+        cand_gen_strs = cand_gen_strs[:self.num_cand_gen]
+        cand_cond_gold = 0
         if ent_str in cand_gen_strs:
             not_in_cand = False
+            index = cand_gen_strs.index(ent_str)
             cand_gen_strs.remove(ent_str)
+            cand_cond_gold = cand_cond_feature.pop(index)
         else:
             not_in_cand = True
 
@@ -124,9 +90,10 @@ class Dataset(object):
             cand_strs = cand_gen_strs[:-1]
         label = random.randint(0, self.args.num_candidates - 1)
         cand_strs.insert(label, ent_str)
+        cand_cond_feature.insert(label, cand_cond_gold)
         cand_ids = np.array([self.ent2id.get(cand_str, 0) for cand_str in cand_strs], dtype=np.int64)
 
-        return cand_ids, cand_strs, not_in_cand, label
+        return cand_ids, cand_strs, not_in_cand, label, cand_cond_feature
 
     def __getitem__(self, index):
         if isinstance(index, slice):
@@ -140,7 +107,7 @@ class Dataset(object):
         cand_cond_feature = np.array([float(feature) for feature in equalize_len(list(cand_cond_feature), self.args.num_candidates)])
 
         ent_str = self.redirects.get(ent_str, ent_str)
-        cand_ids, cand_strs, not_in_cand, label = self._get_cands(ent_str, cand_gen_strs)
+        cand_ids, cand_strs, not_in_cand, label, cand_cond_feature = self._get_cands(ent_str, cand_gen_strs, cand_cond_feature)
 
         try:
             context = self.processed_id2context[doc_id]
@@ -149,7 +116,6 @@ class Dataset(object):
 
         exact_match, contains = self.feature_generator.get_string_feats(mention_str, cand_strs)
         priors, conditionals, _ = self.feature_generator.get_stat_feats(mention_str, cand_strs)
-        # features_dict = self._gen_features(mention_str, cand_strs)
 
         output = {'candidate_ids': cand_ids,
                   'not_in_cand': not_in_cand,

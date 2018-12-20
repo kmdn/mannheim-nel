@@ -32,13 +32,8 @@ def gen_training_examples(train_file, data_path, dataset_name):
 
     coref_resolver = HeuresticCorefResolver()
     detector = SpacyDetector()
-    candidate_generator = NelCandidateGenerator(max_cands=256,
-                                                disamb=file_stores['disamb'],
-                                                redirects=file_stores['redirects'],
-                                                str_necounts=file_stores['str_necounts'])
-    feature_generator = FeatureGenerator(str_prior=file_stores['str_prior'],
-                                         str_cond=file_stores['str_cond'],
-                                         ent_dict=file_stores['ent_dict'])
+    candidate_generator = NelCandidateGenerator(max_cands=256, file_stores=file_stores)
+    feature_generator = FeatureGenerator(file_stores=file_stores)
 
     logger.info("Creating training examples....")
     full_training_examples = {split: [] for split in splits}
@@ -61,9 +56,7 @@ def gen_training_examples(train_file, data_path, dataset_name):
 
             all_cand_cond_dict = {}
             for mention_idx, mention in enumerate(doc.mentions):
-                _, _, cand_cond_dict = feature_generator.get_stat_feats(file_stores['str_prior'],
-                                                                        file_stores['str_cond'],
-                                                                        mention.text,
+                _, _, cand_cond_dict = feature_generator.get_stat_feats(mention.text,
                                                                         mention.cands)
                 for cand, cond in cand_cond_dict.items():
                     all_cand_cond_dict[cand] = max(all_cand_cond_dict.get(cand, 0), cond)
