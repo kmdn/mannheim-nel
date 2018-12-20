@@ -18,7 +18,7 @@ dp:0.2
 
 # Candidate Generation
 num_candidates:128
-prop_gen_candidates:0.75
+prop_gen_candidates:1
 
 # Trainer Settings
 patience:10

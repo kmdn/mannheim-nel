@@ -107,6 +107,7 @@ class Dataset(object):
         cand_feature_list = example_list[3:]
         cand_gen_strs, cand_cond_feature = zip(*[cand_feature.split('@@') for cand_feature in cand_feature_list])
         cand_cond_feature = [float(feature) for feature in equalize_len(list(cand_cond_feature), self.args.num_candidates)]
+        print('##################')
         print(list(cand_gen_strs[:5]))
         print(cand_cond_feature[:5])
         print()
@@ -114,6 +115,7 @@ class Dataset(object):
         cand_ids, cand_strs, not_in_cand, label, cand_cond_feature = self._get_cands(ent_str, cand_gen_strs, cand_cond_feature)
         print(cand_strs[:5])
         print(cand_cond_feature[:5])
+        print('##################')
 
 
         try:
