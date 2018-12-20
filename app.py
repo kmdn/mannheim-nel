@@ -33,13 +33,10 @@ def setup(data_path, args):
         file_stores[dict_name] = FileObjectStore(join(data_path, f'mmaps/{dict_name}'))
 
     app.logger.info('creating preprocessor, respolver, detector and candidate generator.....')
-    processor = FeatureGenerator(**file_stores)
+    processor = FeatureGenerator(file_stores=file_stores)
     coref_resolver = HeuresticCorefResolver()
     detector = SpacyDetector()
-    candidate_generator = NelCandidateGenerator(max_cands=100,
-                                                disamb=file_stores['disamb'],
-                                                redirects=file_stores['redirects'],
-                                                str_necounts=file_stores['str_necounts'])
+    candidate_generator = NelCandidateGenerator(max_cands=100, file_stores=file_stores)
     app.logger.info('created')
 
     args.hidden_size = state_dict['hidden.weight'].shape[0]
