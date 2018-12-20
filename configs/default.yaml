@@ -17,7 +17,6 @@ hidden_size:2000
 dp:0.2
 
 # Candidate Generation
-cand_type:necounts
 num_candidates:128
 prop_gen_candidates:0.75
 

@@ -53,10 +53,8 @@ def parse_args():
 
     # Candidate Generation
     candidate = parser.add_argument_group('Candidate generation.')
-    candidate.add_argument('--cand_type', choices=['necounts', 'pershina'], help='whether to use pershina candidates')
     candidate.add_argument("--num_candidates", type=int, default=32, help="Total number of candidates")
     candidate.add_argument("--prop_gen_candidates", type=float, default=0.5, help="Proportion of candidates generated")
-    candidate.add_argument("--coref", type=str2bool, default=False, help="Whether to use coref cands")
 
     # Training
     training = parser.add_argument_group("Training parameters.")

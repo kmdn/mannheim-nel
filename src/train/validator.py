@@ -78,7 +78,7 @@ class Validator:
             scores, _, _ = model(data_dict)
             scores = scores.cpu().data.numpy()
 
-            print(scores[:10, :10])
+            # print(scores[:10, :10])
 
             preds_mask = np.argmax(scores, axis=1)
             preds = cand_strs[np.arange(len(preds_mask)), preds_mask]

@@ -8,6 +8,7 @@ from src.utils.tokenizer import RegexpTokenizer
 from src.utils.utils import reverse_dict, equalize_len
 from src.pipeline.features import FeatureGenerator
 import random
+import sys
 
 from logging import getLogger
 
@@ -39,7 +40,7 @@ class Dataset(object):
         self.ent_strs = list(self.str_prior.keys())
 
         # Features
-        self.feature_generator = FeatureGenerator(**file_stores)
+        self.feature_generator = FeatureGenerator(file_stores=file_stores)
 
         # Candidates
         self.num_candidates = self.args.num_candidates
@@ -73,7 +74,7 @@ class Dataset(object):
 
     def _get_cands(self, ent_str, cand_gen_strs, cand_cond_feature):
 
-        cand_gen_strs = cand_gen_strs[:self.num_cand_gen]
+        cand_gen_strs = list(cand_gen_strs[:self.num_cand_gen])
         cand_cond_gold = 0
         if ent_str in cand_gen_strs:
             not_in_cand = False
@@ -81,6 +82,7 @@ class Dataset(object):
             cand_gen_strs.remove(ent_str)
             cand_cond_gold = cand_cond_feature.pop(index)
         else:
+            cand_cond_feature = cand_cond_feature[:-1]
             not_in_cand = True
 
         len_rand = self.num_candidates - len(cand_gen_strs) - 1
@@ -93,7 +95,7 @@ class Dataset(object):
         cand_cond_feature.insert(label, cand_cond_gold)
         cand_ids = np.array([self.ent2id.get(cand_str, 0) for cand_str in cand_strs], dtype=np.int64)
 
-        return cand_ids, cand_strs, not_in_cand, label, cand_cond_feature
+        return cand_ids, cand_strs, not_in_cand, label, np.array(cand_cond_feature)
 
     def __getitem__(self, index):
         if isinstance(index, slice):
@@ -104,10 +106,15 @@ class Dataset(object):
 
         cand_feature_list = example_list[3:]
         cand_gen_strs, cand_cond_feature = zip(*[cand_feature.split('@@') for cand_feature in cand_feature_list])
-        cand_cond_feature = np.array([float(feature) for feature in equalize_len(list(cand_cond_feature), self.args.num_candidates)])
-
+        cand_cond_feature = [float(feature) for feature in equalize_len(list(cand_cond_feature), self.args.num_candidates)]
+        # print(cand_gen_strs)
+        # print(cand_cond_feature)
+        # print()
         ent_str = self.redirects.get(ent_str, ent_str)
         cand_ids, cand_strs, not_in_cand, label, cand_cond_feature = self._get_cands(ent_str, cand_gen_strs, cand_cond_feature)
+        # print(cand_strs)
+        # print(cand_cond_feature)
+        # sys.exit(1)
 
         try:
             context = self.processed_id2context[doc_id]
