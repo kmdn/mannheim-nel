@@ -21,11 +21,10 @@ app = Flask(__name__)
 
 
 def setup(data_path, args):
-    app.logger.info('loading models params.....')
+    app.logger.info(f'loading models params from models/{args.model}.....')
     state_dict = torch.load(join(data_path, f'models/{args.model}'), map_location='cpu')['state_dict']
     ent_embs = state_dict['ent_embs.weight']
     word_embs = state_dict['word_embs.weight']
-    app.logger.info('yamada models loaded.')
 
     app.logger.info('creating file stores.....')
     dict_names = ['ent_dict', 'word_dict', 'redirects', 'str_prior', 'str_cond', 'disamb', 'str_necounts']
@@ -44,6 +43,8 @@ def setup(data_path, args):
     app.logger.info('created')
 
     args.hidden_size = state_dict['hidden.weight'].shape[0]
+
+    print(state_dict.keys())
 
     app.logger.info('creating model.....')
     model = MLPModel(ent_embs=ent_embs,

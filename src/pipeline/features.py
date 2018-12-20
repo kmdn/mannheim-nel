@@ -19,13 +19,12 @@ class FeatureGenerator(object):
 
         return exact_match, contains
 
-    @staticmethod
-    def get_stat_feats(str_prior, str_cond, mention_str, candidates):
+    def get_stat_feats(self, mention_str, candidates):
         nf = normalise_form(mention_str)
-        priors = [str_prior.get(candidate, 0) for candidate in candidates]
+        priors = [self.str_prior.get(candidate, 0) for candidate in candidates]
 
-        if nf in str_cond:
-            conditionals = np.array([str_cond[nf].get(candidate, 0) for candidate in candidates], dtype=np.float32)
+        if nf in self.str_cond:
+            conditionals = np.array([self.str_cond[nf].get(candidate, 0) for candidate in candidates], dtype=np.float32)
         else:
             conditionals = np.zeros(len(candidates))
 
@@ -56,9 +55,7 @@ class FeatureGenerator(object):
             all_exact_match.append(exact_match)
             all_contains.append(contains)
 
-            priors, conditionals, cand_cond_dict = self.get_stat_feats(self.str_prior,
-                                                                       self.str_cond,
-                                                                       mention.text,
+            priors, conditionals, cand_cond_dict = self.get_stat_feats(mention.text,
                                                                        mention.cands)
             for cand, cond in cand_cond_dict.items():
                 all_cand_cond_dict[cand] = max(all_cand_cond_dict.get(cand, 0), cond)
@@ -75,6 +72,9 @@ class FeatureGenerator(object):
                'conditionals': np.array(all_conditionals, dtype=np.float32),
                'exact_match': np.array(all_exact_match, dtype=np.float32),
                'contains': np.array(all_contains, dtype=np.float32),
-               'cand_cond_feature': np.array(cand_cond_feature, dtype=np.float32),}
+               'cand_cond_feature': np.array(cand_cond_feature, dtype=np.float32)}
+
+        # print(ret['candidate_strs'][:, :10])
+        # print(ret['cand_cond_feature'][:, :10])
 
         return ret

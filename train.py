@@ -111,7 +111,7 @@ def parse_args():
 def setup(args, logger):
 
     print()
-    logger.info("Loading pre trained model at models/conll_v0.1.pt.....")
+    logger.info("Loading word and entity embeddings from models/conll_v0.1.pt.....")
     state_dict = torch.load(join(args.data_path, 'models/conll_v0.1.pt'), map_location='cpu')['state_dict']
     ent_embs = state_dict['ent_embs.weight']
     word_embs = state_dict['word_embs.weight']
@@ -216,7 +216,9 @@ if __name__ == '__main__':
 
     Model = get_model(Args, Word_embs, Ent_Embs, Logger)
     if Args.pre_train:
-        state_dict = torch.load(Args.pre_train, map_location=Args.device if Args.use_cuda else 'cpu')['state_dict']
+        Logger.info(f"loading pre trained model at models/{Args.pre_train}")
+        state_dict = torch.load(join(Args.data_path, 'models', Args.pre_train),
+                                map_location=Args.device if Args.use_cuda else 'cpu')['state_dict']
         Model.load_state_dict(state_dict)
     train(model=Model,
           train_dataset=Train_dataset,

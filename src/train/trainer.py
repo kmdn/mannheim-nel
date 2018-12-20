@@ -141,7 +141,7 @@ class Trainer(object):
                     'epoch': epoch + 1,
                     'state_dict': self.model.state_dict(),
                     **self.optimizer.get_state_dict()},
-                    filename=join(self.model_dir, '{}.ckpt'.format(epoch)))
+                    filename=join(self.model_dir, '{}.pt'.format(epoch)))
 
             results = self.validate(epoch)
             valid_metric = results['conll']

@@ -56,15 +56,15 @@ format which we can't distribute due to licensing issues. Each document must sta
 -DOCSTART- ([DOC ID])
 
 The doc id can be anything you choose, but for dev documents it should include 'testa' and for test documents it 
-should include 'testb'. Each line thereafter, should have four feilds separated by tabs: Token,
+should include 'testb'. Each line thereafter, should have five fields separated by tabs: Token,
 [BIO tag](https://en.wikipedia.org/wiki/Inside%E2%80%93outside%E2%80%93beginning_(tagging)), full name of mention, 
 title of entity it refers to and wikipedia page URL. For example:
 
-German    B    German    German    http://en.wikipedia.org/wiki/Germany
+German\tB\tGerman\tGermany\thttp://en.wikipedia.org/wiki/Germany
 
-European    B    European Commision    European_Commission     http://en.wikipedia.org/wiki/European_Commission
+European\tB\tEuropean Commision\tEuropean_Commission\thttp://en.wikipedia.org/wiki/European_Commission
 
-Commision    I    European Commision    European_Commission     http://en.wikipedia.org/wiki/European_Commission
+Commision\tI\tEuropean Commision\tEuropean_Commission\thttp://en.wikipedia.org/wiki/European_Commission
 
 Each document should be demarcated by a blank line. A default config file is provided and can be used to 
 train a new model on CPU like so

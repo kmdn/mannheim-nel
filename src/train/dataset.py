@@ -5,7 +5,8 @@ import numpy as np
 from more_itertools import unique_everseen
 
 from src.utils.tokenizer import RegexpTokenizer
-from src.utils.utils import reverse_dict, equalize_len, get_normalised_forms, normalise_form
+from src.utils.utils import reverse_dict, equalize_len, normalise_form
+from src.pipeline.features import FeatureGenerator
 import random
 
 from logging import getLogger
@@ -41,6 +42,9 @@ class Dataset(object):
         self.disamb = dicts['disamb']
         self.str_necounts = dicts['str_necounts']
         self.ent_strs = list(self.str_prior.keys())
+
+        # Features
+        self.feature_generator = FeatureGenerator(**dicts)
 
         # Candidates
         self.num_candidates = self.args.num_candidates
@@ -142,7 +146,10 @@ class Dataset(object):
             context = self.processed_id2context[doc_id]
         except KeyError:
             context = self.processed_id2context[str(doc_id)]
-        features_dict = self._gen_features(mention_str, cand_strs)
+
+        exact_match, contains = self.feature_generator.get_string_feats(mention_str, cand_strs)
+        priors, conditionals, _ = self.feature_generator.get_stat_feats(mention_str, cand_strs)
+        # features_dict = self._gen_features(mention_str, cand_strs)
 
         output = {'candidate_ids': cand_ids,
                   'not_in_cand': not_in_cand,
@@ -151,7 +158,10 @@ class Dataset(object):
                   'ent_strs': ent_str,
                   'label': label,
                   'cand_cond_feature': np.array(cand_cond_feature, dtype=np.float32),
-                  **features_dict}
+                  'exact_match': np.array(exact_match, dtype=np.float32),
+                  'contains': np.array(contains, dtype=np.float32),
+                  'priors': np.array(priors, dtype=np.float32),
+                  'conditionals': np.array(conditionals, dtype=np.float32)}
 
         return output
 
