@@ -61,7 +61,7 @@ def linking():
     text = content.get('text', '')
     user_mentions = content.get('mentions', [])
     user_spans = content.get('spans', [])
-    max_cands = content.get('max_cands', 100)
+    max_cands = content.get('max_cands', 200)
 
     Candidate_generator.max_cands = max_cands
 
@@ -93,11 +93,7 @@ def linking():
 
     assert len(mentions) == len(entities) == len(mention_spans)
 
-    cand_cond = input_dict['cand_cond_feature'].numpy().tolist()
-
-    return jsonify({'mentions': mentions, 'entities': entities, 'spans': mention_spans,
-                    'cands': candidate_strs.tolist(),
-                    'cand_cond': cand_cond}), 201
+    return jsonify({'mentions': mentions, 'entities': entities, 'spans': mention_spans}), 201
 
 
 if __name__ == '__main__':

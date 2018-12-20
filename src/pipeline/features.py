@@ -63,8 +63,7 @@ class FeatureGenerator(object):
             all_priors.append(priors)
             all_conditionals.append(conditionals)
 
-        cand_cond_feature = [[all_cand_cond_dict[cand] for cand in cand_list]
-                                 for cand_list in all_candidate_strs]
+        cand_cond_feature = [[all_cand_cond_dict[cand] for cand in cand_list] for cand_list in all_candidate_strs]
 
         ret = {'context': np.array(context_tokens, dtype=np.int64),
                'candidate_ids': np.array(all_candidate_ids, dtype=np.int64),

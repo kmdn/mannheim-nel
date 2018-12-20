@@ -46,6 +46,7 @@ class MLPModel(Loss, nn.Module):
         for k, v in input_dict.items():
             if isinstance(v, np.ndarray):
                 input_dict[k] = torch.from_numpy(v)
+            # print(k, v.shape)
         b, num_cand = input_dict['candidate_ids'].shape
 
         # Get the embeddings
