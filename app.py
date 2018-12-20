@@ -5,6 +5,7 @@ import argparse
 from os.path import join
 import torch
 import logging
+import json
 
 from src.pipeline.features import FeatureGenerator
 from src.pipeline.detector import SpacyDetector
@@ -40,8 +41,6 @@ def setup(data_path, args):
     app.logger.info('created')
 
     args.hidden_size = state_dict['hidden.weight'].shape[0]
-
-    print(state_dict.keys())
 
     app.logger.info('creating model.....')
     model = MLPModel(ent_embs=ent_embs,
@@ -94,7 +93,11 @@ def linking():
 
     assert len(mentions) == len(entities) == len(mention_spans)
 
-    return jsonify({'mentions': mentions, 'entities': entities, 'spans': mention_spans}), 201
+    cand_cond = input_dict['cand_cond_feature'].numpy().tolist()
+
+    return jsonify({'mentions': mentions, 'entities': entities, 'spans': mention_spans,
+                    'cands': candidate_strs.tolist(),
+                    'cand_cond': cand_cond}), 201
 
 
 if __name__ == '__main__':
