@@ -211,8 +211,7 @@ if __name__ == '__main__':
     Model = get_model(Args, Word_embs, Ent_Embs, Logger)
     if Args.pre_train:
         Logger.info(f"loading pre trained model at models/{Args.pre_train}")
-        state_dict = torch.load(join(Args.data_path, 'models', Args.pre_train),
-                                map_location=Args.device if Args.use_cuda else 'cpu')['state_dict']
+        state_dict = torch.load(join(Args.data_path, 'models', Args.pre_train), map_location='cpu')['state_dict']
         Model.load_state_dict(state_dict)
     train(model=Model,
           train_dataset=Train_dataset,
