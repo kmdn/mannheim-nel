@@ -19,6 +19,7 @@ np.warnings.filterwarnings('ignore')
 
 app = Flask(__name__)
 
+MAX_CANDS = 256
 
 def setup(data_path, args):
     app.logger.info('loading models params.....')
@@ -37,7 +38,7 @@ def setup(data_path, args):
     processor = FeatureGenerator(**file_stores)
     coref_resolver = HeuresticCorefResolver()
     detector = SpacyDetector()
-    candidate_generator = NelCandidateGenerator(max_cands=100,
+    candidate_generator = NelCandidateGenerator(max_cands=MAX_CANDS,
                                                 disamb=file_stores['disamb'],
                                                 redirects=file_stores['redirects'],
                                                 str_necounts=file_stores['str_necounts'])
@@ -64,7 +65,7 @@ def linking():
     text = content.get('text', '')
     user_mentions = content.get('mentions', [])
     user_spans = content.get('spans', [])
-    max_cands = content.get('max_cands', 100)
+    max_cands = content.get('max_cands', MAX_CANDS)
 
     Candidate_generator.max_cands = max_cands
 

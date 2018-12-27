@@ -1,5 +1,6 @@
 # Validator class for yamada model
 
+from os.path import join
 import numpy as np
 from torch.autograd import Variable
 from logging import getLogger
@@ -70,6 +71,8 @@ class Validator:
         total_mentions = 0
         cor_adjust = 0
 
+        pred_str = ''
+
         for batch_no, data in enumerate(self.loader, 0):
             data_dict, ent_strs, cand_strs, not_in_cand = self._get_next_batch(data)
 
@@ -78,6 +81,8 @@ class Validator:
 
             preds_mask = np.argmax(scores, axis=1)
             preds = cand_strs[np.arange(len(preds_mask)), preds_mask]
+            for i, pred in enumerate(preds):
+                pred_str += '||'.join([str(batch_no * self.args.batch_size + i), ent_strs[i], pred]) + '\n'
 
             cor = preds == ent_strs
             num_cor = cor.sum()
@@ -87,6 +92,9 @@ class Validator:
             total_mentions += scores.shape[0]
             total_not_in_cand += not_in_cand.sum()
             cor_adjust += not_in_cand[cor_idxs].sum()
+
+        with open(join(self.args.data_path, 'preds', 'conll.csv')) as f:
+            f.write(pred_str)
 
         return total_mentions, total_not_in_cand, total_correct, cor_adjust
 
