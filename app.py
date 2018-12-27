@@ -80,7 +80,7 @@ def linking():
     input_dict.pop('candidate_strs')
 
     for k, v in input_dict.items():
-        print(k, v[:5, :5])
+        print(k, v[:5])
 
     scores, _, _ = Model(input_dict)
 
