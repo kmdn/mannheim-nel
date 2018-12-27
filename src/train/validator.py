@@ -93,7 +93,7 @@ class Validator:
             total_not_in_cand += not_in_cand.sum()
             cor_adjust += not_in_cand[cor_idxs].sum()
 
-        with open(join(self.args.data_path, 'preds', 'conll.csv')) as f:
+        with open(join(self.args.data_path, 'preds', 'conll.csv'), 'w') as f:
             f.write(pred_str)
 
         return total_mentions, total_not_in_cand, total_correct, cor_adjust
