@@ -87,9 +87,7 @@ def linking():
 
     for i, ent in enumerate(entities):
         if len(ent) == 0:
-            entities.pop(i)
-            mentions.pop(i)
-            mention_spans.pop(i)
+            entities[i] = 'NO LINK FOUND'
 
     assert len(mentions) == len(entities) == len(mention_spans)
 

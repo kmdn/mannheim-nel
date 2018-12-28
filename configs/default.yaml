@@ -10,7 +10,6 @@ data_types:conll
 # Padding
 max_ent_size:35
 max_context_size:100
-num_docs:100
 
 # Model Params
 hidden_size:2000
