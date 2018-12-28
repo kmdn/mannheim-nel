@@ -25,7 +25,8 @@ def grid_search(word_embs=None,
                 datasets=None,
                 model_dir=None,
                 train_dataset=None,
-                args=None):
+                args=None,
+                file_stores=None):
     param_grid = {'dp': [0.1, 0.2, 0.3, 0.5, 0.8],
                   'hidden_size': [1000, 2000, 3000],
                   'lr': [1e-2, 5e-2, 1e-3, 5e-2],
@@ -68,7 +69,7 @@ def grid_search(word_embs=None,
             logger.info(f'Len loader {data_type} : {len(loader)}')
             validators[data_type] = Validator(loader=loader,
                                               args=args,
-                                              dicts=File_stores)
+                                              file_stores=file_stores)
 
         trainer = Trainer(loader=train_loader,
                           args=args,
@@ -112,6 +113,7 @@ if __name__ == '__main__':
                                        train_dataset=Train_dataset,
                                        datasets=Datasets,
                                        logger=Logger,
-                                       args=Args)
+                                       args=Args,
+                                       file_stores=File_stores)
     df = pd.DataFrame(pd_dict)
     df.to_csv(join(Model_dir, 'hyper_df.csv'))
