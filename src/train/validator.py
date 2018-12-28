@@ -17,12 +17,12 @@ class Validator:
                  args=None,
                  data_type=None,
                  run=None,
-                 dicts=None):
+                 file_stores=None):
 
         self.loader = loader
         self.args = args
-        self.ent_dict = dicts['ent_dict']
-        self.word_dict = dicts['word_dict']
+        self.ent_dict = file_stores['ent_dict']
+        self.word_dict = file_stores['word_dict']
         self.rev_ent_dict = reverse_dict(self.ent_dict)
         self.rev_word_dict = reverse_dict(self.word_dict)
         self.data_type = data_type

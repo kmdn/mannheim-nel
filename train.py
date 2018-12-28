@@ -163,7 +163,7 @@ def train(model=None,
           datasets=None,
           train_dataset=None,
           args=None,
-          dicts=None,
+          file_stores=None,
           run=None):
 
     train_loader = train_dataset.get_loader(batch_size=args.batch_size,
@@ -184,7 +184,7 @@ def train(model=None,
                                           args=args,
                                           data_type=data_type,
                                           run=run,
-                                          dicts=dicts)
+                                          file_stores=file_stores)
 
     trainer = Trainer(loader=train_loader,
                       args=args,
@@ -205,7 +205,7 @@ def train(model=None,
 
 if __name__ == '__main__':
     Args, Logger, Model_dir = parse_args()
-    Train_dataset, Datasets, Word_embs, Ent_Embs, Dicts = setup(Args, Logger)
+    Train_dataset, Datasets, Word_embs, Ent_Embs, File_stores = setup(Args, Logger)
 
     Model = get_model(Args, Word_embs, Ent_Embs, Logger)
     if Args.pre_train:
@@ -217,4 +217,4 @@ if __name__ == '__main__':
           datasets=Datasets,
           logger=Logger,
           args=Args,
-          dicts=Dicts)
+          file_stores=File_stores)

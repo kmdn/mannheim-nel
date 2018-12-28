@@ -36,7 +36,6 @@ def grid_search(word_embs=None,
                   }
     grid_results_dict = {}
     pd_results = list()
-    dicts = load_file_stores(args.data_path)
     data_types = args.data_types.split(',')
 
     for param_dict in list(ParameterSampler(param_grid, 50)):
@@ -69,7 +68,7 @@ def grid_search(word_embs=None,
             logger.info(f'Len loader {data_type} : {len(loader)}')
             validators[data_type] = Validator(loader=loader,
                                               args=args,
-                                              dicts=dicts)
+                                              dicts=File_stores)
 
         trainer = Trainer(loader=train_loader,
                           args=args,
@@ -106,7 +105,7 @@ def grid_search(word_embs=None,
 
 if __name__ == '__main__':
     Args, Logger, Model_dir = parse_args()
-    Train_dataset, Datasets, Word_embs, Ent_embs, Dicts = setup(Args, Logger)
+    Train_dataset, Datasets, Word_embs, Ent_embs, File_stores = setup(Args, Logger)
     result_dict, pd_dict = grid_search(word_embs=Word_embs,
                                        ent_embs=Ent_embs,
                                        model_dir=Model_dir,
