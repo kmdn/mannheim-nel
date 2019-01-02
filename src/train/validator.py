@@ -18,16 +18,18 @@ class Validator:
                  args=None,
                  data_type=None,
                  run=None,
-                 dicts=None):
+                 file_stores=None):
 
         self.loader = loader
         self.args = args
-        self.ent_dict = dicts['ent_dict']
-        self.word_dict = dicts['word_dict']
+        self.ent_dict = file_stores['ent_dict']
+        self.word_dict = file_stores['word_dict']
         self.rev_ent_dict = reverse_dict(self.ent_dict)
         self.rev_word_dict = reverse_dict(self.word_dict)
         self.data_type = data_type
         self.run = run
+
+        print(f'Validator has batch size: {self.loader.batch_size}')
 
     def _get_next_batch(self, data_dict):
         skip_keys = ['ent_strs', 'cand_strs', 'not_in_cand']
@@ -78,6 +80,8 @@ class Validator:
 
             scores, _, _ = model(data_dict)
             scores = scores.cpu().data.numpy()
+
+            # print(scores[:10, :10])
 
             preds_mask = np.argmax(scores, axis=1)
             preds = cand_strs[np.arange(len(preds_mask)), preds_mask]

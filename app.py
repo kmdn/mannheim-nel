@@ -22,11 +22,10 @@ app = Flask(__name__)
 MAX_CANDS = 256
 
 def setup(data_path, args):
-    app.logger.info('loading models params.....')
+    app.logger.info(f'loading models params from models/{args.model}.....')
     state_dict = torch.load(join(data_path, f'models/{args.model}'), map_location='cpu')['state_dict']
     ent_embs = state_dict['ent_embs.weight']
     word_embs = state_dict['word_embs.weight']
-    app.logger.info('yamada models loaded.')
 
     app.logger.info('creating file stores.....')
     dict_names = ['ent_dict', 'word_dict', 'redirects', 'str_prior', 'str_cond', 'disamb', 'str_necounts']
@@ -35,7 +34,7 @@ def setup(data_path, args):
         file_stores[dict_name] = FileObjectStore(join(data_path, f'mmaps/{dict_name}'))
 
     app.logger.info('creating preprocessor, respolver, detector and candidate generator.....')
-    processor = FeatureGenerator(**file_stores)
+    processor = FeatureGenerator(file_stores=file_stores)
     coref_resolver = HeuresticCorefResolver()
     detector = SpacyDetector()
     candidate_generator = NelCandidateGenerator(max_cands=MAX_CANDS,
@@ -60,7 +59,6 @@ def setup(data_path, args):
 
 @app.route('/link', methods=['GET', 'POST'])
 def linking():
-
     content = request.get_json(force=True)
     text = content.get('text', '')
     user_mentions = content.get('mentions', [])
@@ -90,9 +88,12 @@ def linking():
 
     for i, ent in enumerate(entities):
         if len(ent) == 0:
-            entities.pop(i)
-            mentions.pop(i)
-            mention_spans.pop(i)
+            if user_mentions:
+                entities[i] = 'NO LINK FOUND'
+            else:
+                entities.pop(i)
+                mentions.pop(i)
+                mention_spans.pop(i)
 
     assert len(mentions) == len(entities) == len(mention_spans)
 

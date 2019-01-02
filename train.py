@@ -8,7 +8,7 @@ import sys
 import numpy as np
 import torch
 
-from src.utils.utils import str2bool, send_to_cuda
+from src.utils.utils import str2bool, send_to_cuda, load_file_stores
 from src.train.dataset import Dataset
 from src.train.validator import Validator
 from src.models.mlpmodel import MLPModel
@@ -40,8 +40,6 @@ def parse_args():
     padding = parser.add_argument_group('Max Padding for batch.')
     padding.add_argument('--max_context_size', type=int, help='max number of context')
     padding.add_argument('--max_ent_size', type=int, help='max number of entities considered in abstract')
-    padding.add_argument('--num_docs', type=int, help='max number of docs to use to create corpus vec')
-    padding.add_argument('--ignore_init', type=str2bool, help='whether to ignore first five tokens of context')
 
     # Model Type
     model_selection = parser.add_argument_group('Type of model to train.')
@@ -54,10 +52,8 @@ def parse_args():
 
     # Candidate Generation
     candidate = parser.add_argument_group('Candidate generation.')
-    candidate.add_argument('--cand_type', choices=['necounts', 'pershina'], help='whether to use pershina candidates')
     candidate.add_argument("--num_candidates", type=int, default=32, help="Total number of candidates")
     candidate.add_argument("--prop_gen_candidates", type=float, default=0.5, help="Proportion of candidates generated")
-    candidate.add_argument("--coref", type=str2bool, default=False, help="Whether to use coref cands")
 
     # Training
     training = parser.add_argument_group("Training parameters.")
@@ -112,17 +108,14 @@ def parse_args():
 def setup(args, logger):
 
     print()
-    logger.info("Loading pre trained model at models/conll_v0.1.pt.....")
+    logger.info("Loading word and entity embeddings from models/conll_v0.1.pt.....")
     state_dict = torch.load(join(args.data_path, 'models/conll_v0.1.pt'), map_location='cpu')['state_dict']
     ent_embs = state_dict['ent_embs.weight']
     word_embs = state_dict['word_embs.weight']
     logger.info("Model loaded.")
 
     logger.info("Loading filestore dicts.....")
-    dicts = {}
-    for dict_name in ['str_prior', 'str_cond', 'str_necounts', 'redirects', 'disamb', 'ent_dict', 'word_dict']:
-        dicts[dict_name] = FileObjectStore(join(args.data_path, "mmaps", dict_name))
-    logger.info("Loaded filestores.")
+    file_stores = load_file_stores(args.data_path)
 
     logger.info("Using {} for training.....".format(args.data_type))
     splits = ['train', 'dev', 'test']
@@ -131,8 +124,6 @@ def setup(args, logger):
     for split in splits:
         split_examples[split] = FileObjectStore(join(args.data_path, f'training_files/{args.data_type}/{split}'))
 
-    #sys.exit(1)
-
     logger.info("Data loaded.")
 
     logger.info("Creating data loaders and validators.....")
@@ -140,9 +131,7 @@ def setup(args, logger):
                             examples=split_examples['train'],
                             data_type=args.data_type,
                             args=args,
-                            cand_type=(args.cand_type if args.data_type == 'conll' else 'necounts'),
-                            coref=(args.coref if args.data_type != 'wiki' else False),
-                            dicts=dicts)
+                            file_stores=file_stores)
 
     datasets = {}
     for data_type in args.data_types.split(','):
@@ -150,15 +139,13 @@ def setup(args, logger):
                                       examples=split_examples['dev'],
                                       data_type=args.data_type,
                                       args=args,
-                                      cand_type=(args.cand_type if args.data_type == 'conll' else 'necounts'),
-                                      coref=(args.coref if args.data_type != 'wiki' else False),
-                                      dicts=dicts)
+                                      file_stores=file_stores)
         logger.info(f"{data_type} dev dataset created.")
 
-    return train_dataset, datasets, word_embs, ent_embs, dicts
+    return train_dataset, datasets, word_embs, ent_embs, file_stores
 
 
-def get_model(args, word_embs, ent_embs,logger):
+def get_model(args, word_embs, ent_embs, logger):
 
     model = MLPModel(word_embs=word_embs,
                      ent_embs=ent_embs,
@@ -176,7 +163,7 @@ def train(model=None,
           datasets=None,
           train_dataset=None,
           args=None,
-          dicts=None,
+          file_stores=None,
           run=None):
 
     train_loader = train_dataset.get_loader(batch_size=args.batch_size,
@@ -197,7 +184,7 @@ def train(model=None,
                                           args=args,
                                           data_type=data_type,
                                           run=run,
-                                          dicts=dicts)
+                                          file_stores=file_stores)
 
     trainer = Trainer(loader=train_loader,
                       args=args,
@@ -207,21 +194,27 @@ def train(model=None,
                       profile=args.profile)
     logger.info("Starting Training:")
     print()
-    trainer.train()
+    best_model, best_results = trainer.train()
     logger.info("Finished Training")
+
+    logger.info("Validating with best model....")
+    best_model.eval()
+    for data_type in args.data_types.split(','):
+        validators[data_type].validate(best_model)
 
 
 if __name__ == '__main__':
     Args, Logger, Model_dir = parse_args()
-    Train_dataset, Datasets, Word_embs, Ent_Embs, Dicts = setup(Args, Logger)
+    Train_dataset, Datasets, Word_embs, Ent_Embs, File_stores = setup(Args, Logger)
 
     Model = get_model(Args, Word_embs, Ent_Embs, Logger)
     if Args.pre_train:
-        state_dict = torch.load(Args.pre_train, map_location='cpu')['state_dict']
+        Logger.info(f"loading pre trained model at models/{Args.pre_train}")
+        state_dict = torch.load(join(Args.data_path, 'models', Args.pre_train), map_location='cpu')['state_dict']
         Model.load_state_dict(state_dict)
     train(model=Model,
           train_dataset=Train_dataset,
           datasets=Datasets,
           logger=Logger,
           args=Args,
-          dicts=Dicts)
+          file_stores=File_stores)

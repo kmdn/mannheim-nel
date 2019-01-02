@@ -7,19 +7,11 @@ from src.utils.utils import *
 from src.pipeline.detector import SpacyDetector
 from src.pipeline.coref import HeuresticCorefResolver
 from src.pipeline.candidates import NelCandidateGenerator
+from src.pipeline.features import FeatureGenerator
 from src.utils.file import FileObjectStore
 from src.repr.doc import Doc
 from src.utils.iter_docs import iter_docs
 from logging import getLogger
-
-
-def load_file_stores(data_path):
-    dict_names = ['ent_dict', 'word_dict', 'redirects', 'str_prior', 'str_cond', 'disamb', 'str_necounts']
-    file_stores = {}
-    for dict_name in dict_names:
-        file_stores[dict_name] = FileObjectStore(join(data_path, f'mmaps/{dict_name}'))
-
-    return file_stores
 
 
 def gen_training_examples(train_file, data_path, dataset_name):
@@ -40,10 +32,8 @@ def gen_training_examples(train_file, data_path, dataset_name):
 
     coref_resolver = HeuresticCorefResolver()
     detector = SpacyDetector()
-    candidate_generator = NelCandidateGenerator(max_cands=256,
-                                                disamb=file_stores['disamb'],
-                                                redirects=file_stores['redirects'],
-                                                str_necounts=file_stores['str_necounts'])
+    candidate_generator = NelCandidateGenerator(max_cands=256, file_stores=file_stores)
+    feature_generator = FeatureGenerator(file_stores=file_stores)
 
     logger.info("Creating training examples....")
     full_training_examples = {split: [] for split in splits}
@@ -64,11 +54,21 @@ def gen_training_examples(train_file, data_path, dataset_name):
                       text_spans=text_spans)
             doc.gen_cands()
 
+            all_cand_cond_dict = {}
+            for mention_idx, mention in enumerate(doc.mentions):
+                _, _, cand_cond_dict = feature_generator.get_stat_feats(mention.text,
+                                                                        mention.cands)
+                for cand, cond in cand_cond_dict.items():
+                    all_cand_cond_dict[cand] = max(all_cand_cond_dict.get(cand, 0), cond)
+
             for idx, (doc_id, text, span, ent_str) in enumerate(examples):
                 mention = doc.mentions[idx]
                 assert mention.text == text, (mention.text, text)
                 assert (mention.begin, mention.end) == span
-                full_training_examples[split].append('||'.join((doc_id, text, ent_str, '||'.join(mention.cands))))
+                cand_feature_list = ['@@'.join([cand, str(all_cand_cond_dict[cand])])
+                                     for cand in mention.cands]
+                full_training_examples[split].append('||'.join((doc_id, text, ent_str,
+                                                                '||'.join(cand_feature_list))))
     logger.info("Created.")
 
     train_data_dir = join(data_path, f'training_files/{dataset_name}')
@@ -102,4 +102,4 @@ if __name__ == "__main__":
                         datefmt='%Y-%m-%d %H:%M:%S')
     logger = getLogger(__name__)
     args = parser.parse_args()
-    gen_training_examples(args.train_file, args.data_path, args.dataset_name)
+    gen_training_examples(args.train_file, args.data_path, args.dataset_name, )

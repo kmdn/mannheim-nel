@@ -43,8 +43,8 @@ results for three different values for a fair comparison. Here we show overall *
 
 | Data Set  |        MEL      | TagMe - Threshold 0.1 | TagMe (Threshold 0.3) | TagMe (Threshold 0.5) |
 |-----------|:---------------:|:---------------------:|:---------------------:|:---------------------:|
-| Conll-Dev | **0.68** / 0.85 |        0.39 / 0.70    |     0.52 / 0.77       |     0.33 / 0.86       |
-| MSNBC     | **0.65** / 0.82 |        0.28 / 0.80    |     0.46 / 0.87       |     0.23 / 0.90       |
+| Conll-Dev | **0.70** / 0.88 |        0.39 / 0.70    |     0.52 / 0.77       |     0.33 / 0.86       |
+| MSNBC     | **0.67** / 0.88 |        0.28 / 0.80    |     0.46 / 0.87       |     0.23 / 0.90       |
 
 
 # Train
@@ -56,15 +56,15 @@ format which we can't distribute due to licensing issues. Each document must sta
 -DOCSTART- ([DOC ID])
 
 The doc id can be anything you choose, but for dev documents it should include 'testa' and for test documents it 
-should include 'testb'. Each line thereafter, should have four feilds separated by tabs: Token,
+should include 'testb'. Each line thereafter, should have five fields separated by tabs: Token,
 [BIO tag](https://en.wikipedia.org/wiki/Inside%E2%80%93outside%E2%80%93beginning_(tagging)), full name of mention, 
 title of entity it refers to and wikipedia page URL. For example:
 
-German    B    German    German    http://en.wikipedia.org/wiki/Germany
+German B German Germany http://en.wikipedia.org/wiki/Germany
 
-European    B    European Commision    European_Commission     http://en.wikipedia.org/wiki/European_Commission
+European B European Commision European_Commission http://en.wikipedia.org/wiki/European_Commission
 
-Commision    I    European Commision    European_Commission     http://en.wikipedia.org/wiki/European_Commission
+Commision I European Commision European_Commission http://en.wikipedia.org/wiki/European_Commission
 
 Each document should be demarcated by a blank line. A default config file is provided and can be used to 
 train a new model on CPU like so

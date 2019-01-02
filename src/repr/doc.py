@@ -8,7 +8,8 @@ MAX_CONTEXT = 200
 
 class Doc:
 
-    def __init__(self, text,
+    def __init__(self,
+                 text,
                  text_spans=None,
                  file_stores=None,
                  doc_id=None,
