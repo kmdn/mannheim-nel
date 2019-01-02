@@ -5,7 +5,6 @@ import argparse
 from os.path import join
 import torch
 import logging
-import json
 
 from src.pipeline.features import FeatureGenerator
 from src.pipeline.detector import SpacyDetector

@@ -43,8 +43,8 @@ results for three different values for a fair comparison. Here we show overall *
 
 | Data Set  |        MEL      | TagMe - Threshold 0.1 | TagMe (Threshold 0.3) | TagMe (Threshold 0.5) |
 |-----------|:---------------:|:---------------------:|:---------------------:|:---------------------:|
-| Conll-Dev | **0.68** / 0.85 |        0.39 / 0.70    |     0.52 / 0.77       |     0.33 / 0.86       |
-| MSNBC     | **0.65** / 0.82 |        0.28 / 0.80    |     0.46 / 0.87       |     0.23 / 0.90       |
+| Conll-Dev | **0.66** / 0.88 |        0.39 / 0.70    |     0.52 / 0.77       |     0.33 / 0.86       |
+| MSNBC     | **0.64** / 0.85 |        0.28 / 0.80    |     0.46 / 0.87       |     0.23 / 0.90       |
 
 
 # Train
