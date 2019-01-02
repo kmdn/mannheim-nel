@@ -86,7 +86,7 @@ def linking():
 
     for i, ent in enumerate(entities):
         if len(ent) == 0:
-            if not user_mentions:
+            if user_mentions:
                 entities[i] = 'NO LINK FOUND'
             else:
                 entities.pop(i)
