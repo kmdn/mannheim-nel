@@ -87,12 +87,8 @@ Here we compare MEL's server against TagMe using their [API](https://services.d4
 
 | API   | words / second |
 |:-----:|:--------------:|
-| MEL   |   10,997       |
+| MEL   |   1,248        |
 | TagMe |   1,095        |
-
-**Note**: our server was setup to run on a LAN and TagMe API likely has much higher network latency, still we are 
-about ten times faster! 
-
 
 
 # Contact
