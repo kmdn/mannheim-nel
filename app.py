@@ -80,9 +80,6 @@ def linking():
     candidate_strs = input_dict['candidate_strs']
     input_dict.pop('candidate_strs')
 
-    for k, v in input_dict.items():
-        print(k, v[:5])
-
     scores, _, _ = Model(input_dict)
 
     pred_mask = torch.argmax(scores, len(scores.shape) - 1)
