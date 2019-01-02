@@ -21,6 +21,7 @@ app = Flask(__name__)
 
 MAX_CANDS = 256
 
+
 def setup(data_path, args):
     app.logger.info(f'loading models params from models/{args.model}.....')
     state_dict = torch.load(join(data_path, f'models/{args.model}'), map_location='cpu')['state_dict']
@@ -38,9 +39,7 @@ def setup(data_path, args):
     coref_resolver = HeuresticCorefResolver()
     detector = SpacyDetector()
     candidate_generator = NelCandidateGenerator(max_cands=MAX_CANDS,
-                                                disamb=file_stores['disamb'],
-                                                redirects=file_stores['redirects'],
-                                                str_necounts=file_stores['str_necounts'])
+                                                file_stores=file_stores)
     app.logger.info('created')
 
     args.hidden_size = state_dict['hidden.weight'].shape[0]
